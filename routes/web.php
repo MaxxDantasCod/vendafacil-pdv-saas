@@ -36,6 +36,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/clientes/{id}/editar', [App\Http\Controllers\ClienteController::class, 'edit'])->name('clientes.edit');
     Route::put('/clientes/{id}', [App\Http\Controllers\ClienteController::class, 'update'])->name('clientes.update');
     Route::delete('/clientes/{id}', [App\Http\Controllers\ClienteController::class, 'destroy'])->name('clientes.destroy');
+    // Rotas do PDV
+    Route::get('/pdv', [App\Http\Controllers\PdvController::class, 'index'])->name('pdv.index');
+    Route::get('/pdv/buscar-produto', [App\Http\Controllers\PdvController::class, 'buscarProduto'])->name('pdv.buscar-produto');
+    Route::get('/pdv/buscar-cliente', [App\Http\Controllers\PdvController::class, 'buscarCliente'])->name('pdv.buscar-cliente');
+//  Route::post('/pdv/finalizar', [App\Http\Controllers\PdvController::class, 'finalizarVenda'])->name('pdv.finalizar');
+    Route::post('/pdv/finalizar-venda', [App\Http\Controllers\PdvController::class, 'finalizarVenda'])->name('pdv.finalizar');
 });
 
 require __DIR__.'/auth.php';
