@@ -53,7 +53,7 @@
                 {{ __('Abrir PDV') }}
             </a>
             <a
-                href="{{ route('products.index') }}"
+                href="{{ route('produtos.index') }}"
                 class="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-zinc-600 hover:bg-zinc-800"
             >
                 {{ __('Ver produtos') }}

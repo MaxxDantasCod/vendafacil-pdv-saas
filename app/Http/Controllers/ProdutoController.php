@@ -19,6 +19,7 @@ class ProdutoController extends Controller
             'nome' => 'required|string|max:255',
             'preco' => 'required|numeric|min:0',
             'codigo_barras' => 'nullable|string',
+            
         ]);
     
         $response = Http::withHeaders([
@@ -41,4 +42,26 @@ class ProdutoController extends Controller
         $erro = $response->json();
         return back()->with('error', 'Erro Dolibarr: ' . json_encode($erro));
     }
+    // Editado Maxsuell Dantas
+public function index(Request $request)
+{
+    $termo = $request->input('busca');
+    
+    $url = env('DOLIBARR_BASE_URL') . '/api/index.php/products?sortfield=t.rowid&sortorder=DESC&limit=50';
+    
+    if ($termo) {
+        $url .= '&sqlfilters=(t.label:like:\'%'.$termo.'%\') or (t.ref:like:\'%'.$termo.'%\')';
+    }
+
+    $response = Http::withHeaders([
+        'DOLAPIKEY' => env('DOLIBARR_API_KEY')
+    ])->get($url);
+
+    $produtos = [];
+    if ($response->successful()) {
+        $produtos = $response->json();
+    }
+
+    return view('produtos.index', compact('produtos', 'termo'));
+}
 }
