@@ -48,4 +48,16 @@ Route::middleware('auth')->group(function () {
 })->middleware('auth');
 });
 
+    Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::resource('tenants', TenantController::class);
+});
+
+    Route::middleware(['auth', 'role:dono,superadmin'])->group(function () {
+    Route::resource('users', UserController::class);
+});
+
+    Route::middleware(['auth', 'role:funcionario,dono,superadmin'])->group(function () {
+    Route::resource('products', ProductController::class);
+});
+
 require __DIR__.'/auth.php';

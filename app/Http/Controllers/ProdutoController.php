@@ -64,4 +64,23 @@ public function index(Request $request)
 
     return view('produtos.index', compact('produtos', 'termo'));
 }
+   public function edit(Product $product)
+{
+    $this->authorize('update', $product); // 403 se não puder
+    return view('products.edit', compact('product'));
+}
+
+public function update(Request $request, Product $product)
+{
+    $this->authorize('update', $product);
+    $product->update($request->validated());
+    return redirect()->route('products.index');
+}
+
+public function destroy(Product $product)
+{
+    $this->authorize('delete', $product);
+    $product->delete();
+    return redirect()->route('products.index');
+}
 }

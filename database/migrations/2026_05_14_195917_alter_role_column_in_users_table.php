@@ -9,16 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // LEI 2: QUEM PODE VER - amarra user na loja
-            $table->foreignId('tenant_id')->nullable()->after('id')->constrained('tenants')->onDelete('cascade');
+            $table->string('role', 50)->default('dono')->change();
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-    $table->foreignId('tenant_id')->nullable()->constrained();
-    $table->string('role')->default('funcionario'); // funcionario, dono, superadmin
+            $table->enum('role', ['loja'])->change();
         });
     }
 };
