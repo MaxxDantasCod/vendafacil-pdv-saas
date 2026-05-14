@@ -4,47 +4,52 @@ namespace App\Policies;
 
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProductPolicy
 {
-    // superadmin pode tudo
-    public function before(User $user, string $ability): bool|null
+    use HandlesAuthorization;
+
+    public function before(User $user, $ability)
     {
         if ($user->role === 'superadmin') {
             return true;
         }
-        return null;
     }
 
-    // Quem pode ver a lista
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['funcionario', 'dono']);
+        return in_array($user->role, ['dono', 'funcionario']);
     }
 
-    // Quem pode ver 1 produto específico
     public function view(User $user, Product $product): bool
     {
-        return $user->tenant_id === $product->tenant_id;
+        return $user->tenant_id === $product->tenant_id && 
+               in_array($user->role, ['dono', 'funcionario']);
     }
 
-    // Quem pode criar
     public function create(User $user): bool
     {
-        return in_array($user->role, ['funcionario', 'dono']);
+        return in_array($user->role, ['dono', 'funcionario']);
     }
 
-    // Quem pode editar
     public function update(User $user, Product $product): bool
     {
-        return $user->tenant_id === $product->tenant_id 
-            && in_array($user->role, ['dono']); // só dono edita
+        return $user->role === 'dono' && $user->tenant_id === $product->tenant_id;
     }
 
-    // Quem pode deletar
     public function delete(User $user, Product $product): bool
     {
-        return $user->tenant_id === $product->tenant_id 
-            && $user->role === 'dono'; // só dono deleta
+        return $user->role === 'dono' && $user->tenant_id === $product->tenant_id;
+    }
+
+    public function restore(User $user, Product $product): bool
+    {
+        return $user->role === 'dono' && $user->tenant_id === $product->tenant_id;
+    }
+
+    public function forceDelete(User $user, Product $product): bool
+    {
+        return $user->role === 'dono' && $user->tenant_id === $product->tenant_id;
     }
 }

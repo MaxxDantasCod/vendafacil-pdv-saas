@@ -52,7 +52,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
     
-    protected $fillable = [
-        'name', 'email', 'password', 'tenant_id', 'role',
-    ];
+//    protected $fillable = [
+//        'name', 'email', 'password', 'tenant_id', 'role',
+//    ];
 }

@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Models\Product;
 
 class ProdutoController extends Controller
 {
+    public function __construct()
+    {
+    $this->authorizeResource(Product::class, 'product');
+    }
     public function create()
     {
         return view('produtos.create');

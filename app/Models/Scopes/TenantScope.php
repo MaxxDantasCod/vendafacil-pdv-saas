@@ -8,23 +8,10 @@ use Illuminate\Database\Eloquent\Scope;
 
 class TenantScope implements Scope
 {
-    public function apply(Builder $builder, Model $model): void
+    public function apply(Builder $builder, Model $model)
     {
-    if (auth()->check() && auth()->user()->role !== 'superadmin') {
-        $builder->where($model->getTable() . '.tenant_id', auth()->user()->tenant_id);
-    }
-    }
-
-        // Superadmin vê tudo
-        if (auth()->user()->role === 'superadmin') {
-            return;
-        }
-
-        // Dono ou funcionario: só vê o tenant dele
-        if (auth()->user()->tenant_id) {
+        if (auth()->check() && auth()->user()->role !== 'superadmin') {
             $builder->where($model->getTable() . '.tenant_id', auth()->user()->tenant_id);
-        } else {
-            $builder->whereRaw('1 = 0');
         }
     }
 }
