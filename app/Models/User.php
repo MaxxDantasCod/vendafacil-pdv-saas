@@ -19,10 +19,11 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    'name',
+    'email', 
+    'password',
+    'tenant_id', // ← importante
+];
 
     /**
      * Tenant associado pelo mesmo e-mail (cadastro em `tenants`).

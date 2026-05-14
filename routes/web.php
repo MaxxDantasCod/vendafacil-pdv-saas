@@ -42,6 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/pdv/buscar-cliente', [App\Http\Controllers\PdvController::class, 'buscarCliente'])->name('pdv.buscar-cliente');
 //  Route::post('/pdv/finalizar', [App\Http\Controllers\PdvController::class, 'finalizarVenda'])->name('pdv.finalizar');
     Route::post('/pdv/finalizar-venda', [App\Http\Controllers\PdvController::class, 'finalizarVenda'])->name('pdv.finalizar');
+    Route::get('/teste-tenant', function () {
+    if (!auth()->check()) return 'Não logado';
+    return 'Loja ID: ' . auth()->user()->tenant_id;
+})->middleware('auth');
 });
 
 require __DIR__.'/auth.php';
