@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model
+class Cliente extends Model
 {
-    protected $fillable = ['name', 'price', 'tenant_id', 'dolibarr_id'];
+    protected $fillable = ['id_dolibarr', 'tenant_id'];
 
     protected static function booted()
     {
@@ -17,10 +17,5 @@ class Product extends Model
                 $model->tenant_id = auth()->user()->tenant_id;
             }
         });
-    }
-
-    public function tenant()
-    {
-        return $this->belongsTo(Tenant::class);
     }
 }

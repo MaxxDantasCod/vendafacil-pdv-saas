@@ -1,87 +1,60 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                {{ __('Produtos') }}
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                Produtos
             </h2>
-            <a href="{{ route('produtos.create') }}" 
-               class="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">
-                + Novo Produto
+            <a href="{{ route('produtos.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Novo Produto
             </a>
         </div>
     </x-slot>
 
     <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    @if(session('success'))
-    <div class="mb-4 rounded-lg bg-green-100 p-4 text-sm text-green-700">
-        {{ session('success') }}
-    </div>
-@endif
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
 
-@if($errors->any())
-    <div class="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-700">
-        {{ $errors->first() }}
-    </div>
-@endif
-<div class="mb-4 flex justify-between">
-    <form method="GET" action="{{ route('produtos.index') }}" class="flex gap-2">
-        <input type="text" name="busca" value="{{ $termo ?? '' }}" 
-               placeholder="Buscar por nome ou ref..."
-               class="rounded-md border-gray-300 px-3 py-2">
-        <button type="submit" class="rounded-md bg-gray-800 px-4 py-2 text-sm text-white">
-            Buscar
-        </button>
-        @if($termo)
-            <a href="{{ route('produtos.index') }}" class="rounded-md bg-gray-200 px-4 py-2 text-sm text-gray-800">
-                Limpar
-            </a>
-        @endif
-    </form>
-</div>
-    @if($errors->any())
-        <div class="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-700">
-            {{ $errors->first() }}
-        </div>
-    @endif    
-                <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Ref.</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Nome</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Preço</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Estoque</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            @forelse ($produtos as $produto)
+                    @if(session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(!empty($produtos) && is_array($produtos) && count($produtos) > 0)
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <td class="px-6 py-4">{{ $produto['ref'] ?? '-' }}</td>
-                                    <td class="px-6 py-4">{{ $produto['label'] ?? '-' }}</td>
-                                    <td class="px-6 py-4">R$ {{ number_format($produto['price'] ?? 0, 2, ',', '.') }}</td>
-                                    <td class="px-6 py-4">{{ $produto['stock_reel'] ?? 0 }}</td>
-                                    <td class="px-6 py-4 flex gap-2">
-    <a href="{{ route('produtos.edit', $produto['id']) }}" 
-       class="text-blue-600 hover:text-blue-900">Editar</a>
-    
-    <form action="{{ route('produtos.destroy', $produto['id']) }}" method="POST" 
-          onsubmit="return confirm('Tem certeza que quer deletar?')">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="text-red-600 hover:text-red-900">Deletar</button>
-    </form>
-</td>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Ref</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nome</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Preço</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Ações</th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center">Nenhum produto encontrado no Dolibarr.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                @foreach($produtos as $produto)
+                                    <tr>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $produto['id'] ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $produto['ref_loja'] ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $produto['label'] ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-gray-100">R$ {{ number_format($produto['price'] ?? 0, 2, ',', '.') }}</td>
+                                        <td class="px-6 py-4 flex gap-2">
+                                            <a href="{{ route('produtos.edit', $produto['id']) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Editar</a>
+                                            <form method="POST" action="{{ route('produtos.destroy', $produto['id']) }}" onsubmit="return confirm('Tem certeza?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">Excluir</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @else
+                        <p class="text-gray-500 dark:text-gray-400 text-center py-4">Nenhum produto encontrado para esta loja.</p>
+                    @endif
+
                 </div>
             </div>
         </div>
