@@ -1,0 +1,18 @@
+# VendaFacil PDV
+
+Sistema PDV multi-loja integrado com Dolibarr ERP.
+
+**Stack:** Laravel 11, Breeze, Tailwind, MySQL, Dolibarr API
+
+**Features:**
+- Multi-tenancy - cada loja vê só seus produtos
+- CRUD produtos sincronizado com Dolibarr
+- Autenticação por loja
+- Dark/Light mode
+
+**Rodando local:**
+1. `composer install`
+2. `cp .env.example .env`
+3. Configurar `DOLIBARR_API_KEY` e `DOLIBARR_BASE_URL`
+4. `php artisan migrate`
+5. `php artisan serve`
