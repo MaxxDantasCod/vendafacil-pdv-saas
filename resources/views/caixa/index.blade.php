@@ -14,6 +14,8 @@
             -webkit-appearance: none; 
             margin: 0; 
         }
+        kbd { font-family: monospace; font-size: 0.9em; }
+        .lista-produto-item.bg-blue-600 { background-color: rgb(37 99 235)!important; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 select-none">
@@ -29,7 +31,7 @@
                    autofocus>
             <button onclick="abrirCaixa()" 
                     class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg text-xl">
-                ABRIR CAIXA
+                ENTER - ABRIR CAIXA
             </button>
             <a href="{{ url('/dashboard') }}" class="block text-center mt-4 text-gray-400">Voltar ao Painel</a>
         </div>
@@ -43,14 +45,14 @@
                 <button onclick="toggleFullscreen()" class="p-2 hover:bg-gray-700 rounded-lg">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
                 </button>
-                <span class="text-sm font-bold text-green-400">CAIXA ABERTO</span>
+                <span class="text-sm font-bold text-green-400">CAIXA ABERTO <span class="text-xs text-gray-500">[F9=Atalhos]</span></span>
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="verRelatorio()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-bold">
-                    RELATÓRIO
+                    F8 - RELATÓRIO
                 </button>
                 <button onclick="fecharCaixa()" class="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold">
-                    FECHAR
+                    F10 - FECHAR
                 </button>
             </div>
         </div>
@@ -64,12 +66,12 @@
             
             <!-- Busca Produto -->
             <div class="bg-gray-800 rounded p-3 relative">
-    <label class="block text-sm font-bold mb-1 text-gray-400">F1 - BUSCAR PRODUTO</label>
-    <input type="text" id="busca-produto" placeholder="Código ou nome..."
-           class="w-full rounded bg-gray-700 border-2 border-gray-600 px-3 py-3 text-lg"
-           autocomplete="off">
-    <div id="resultado-produtos" class="mt-2 border-2 border-gray-600 rounded-md bg-gray-700 shadow-xl hidden max-h-60 overflow-y-auto absolute z-50 w-full left-0"></div>
-</div>
+                <label class="block text-sm font-bold mb-1 text-gray-400">F1 - BUSCAR PRODUTO</label>
+                <input type="text" id="busca-produto" placeholder="Código ou nome..."
+                       class="w-full rounded bg-gray-700 border-2 border-gray-600 px-3 py-3 text-lg"
+                       autocomplete="off">
+                <div id="resultado-produtos" class="mt-2 border-2 border-gray-600 rounded-md bg-gray-700 shadow-xl hidden max-h-60 overflow-y-auto absolute z-50 w-full left-0"></div>
+            </div>
 
             <!-- Carrinho -->
             <div class="bg-gray-800 rounded-lg overflow-hidden">
@@ -119,22 +121,28 @@
                 </div>
 
                 <!-- Desconto -->
-                <div class="flex gap-2">
-                    <input type="number" id="desconto-valor" placeholder="Desc" step="0.01" min="0"
-                           class="flex-1 rounded-lg border-2 border-gray-600 bg-gray-700 px-3 py-2 text-lg">
-                    <select id="desconto-tipo" class="rounded-lg border-2 border-gray-600 bg-gray-700 px-3 py-2 text-lg">
-                        <option value="valor">R$</option>
-                        <option value="percent">%</option>
-                    </select>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase">F3 - DESCONTO</label>
+                    <div class="flex gap-2 mt-1">
+                        <input type="number" id="desconto-valor" placeholder="Desc" step="0.01" min="0"
+                               class="flex-1 rounded-lg border-2 border-gray-600 bg-gray-700 px-3 py-2 text-lg">
+                        <select id="desconto-tipo" class="rounded-lg border-2 border-gray-600 bg-gray-700 px-3 py-2 text-lg">
+                            <option value="valor">R$</option>
+                            <option value="percent">%</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Pagamento -->
-                <select id="forma-pagamento" class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 px-3 py-3 text-lg font-bold">
-                    <option value="dinheiro">DINHEIRO</option>
-                    <option value="pix">PIX</option>
-                    <option value="debito">DÉBITO</option>
-                    <option value="credito">CRÉDITO</option>
-                </select>
+                <div>
+                    <label class="text-xs text-gray-400 uppercase">F4 - FORMA DE PAGAMENTO</label>
+                    <select id="forma-pagamento" class="w-full mt-1 rounded-lg border-2 border-gray-600 bg-gray-700 px-3 py-3 text-lg font-bold">
+                        <option value="dinheiro">DINHEIRO</option>
+                        <option value="pix">PIX</option>
+                        <option value="debito">DÉBITO</option>
+                        <option value="credito">CRÉDITO</option>
+                    </select>
+                </div>
 
                 <!-- Total -->
                 <div class="text-center border-t-2 border-gray-600 pt-3">
@@ -150,6 +158,30 @@
                         class="w-full rounded-lg bg-red-600 px-4 py-3 text-lg font-bold active:bg-red-800">
                     ESC - CANCELAR
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Atalhos -->
+    <div id="modalAtalhos" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-lg p-6 w-96">
+                <h3 class="text-xl font-bold text-white mb-4">Atalhos do Teclado</h3>
+                <table class="w-full text-gray-300 text-sm">
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F1</kbd></td><td>Buscar Produto</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F2</kbd></td><td>Buscar Cliente</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F3</kbd></td><td>Desconto</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F4</kbd></td><td>Forma Pagamento</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F5</kbd></td><td>Abrir Caixa</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F8</kbd></td><td>Relatorio Detalhado</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F10</kbd></td><td>Fechar Caixa</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F12</kbd></td><td>Finalizar Venda</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">ESC</kbd></td><td>Cancelar</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">↑ ↓</kbd></td><td>Navegar produtos</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">Enter</kbd></td><td>Add produto</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F9</kbd></td><td>Ver atalhos</td></tr>
+                </table>
+                <button onclick="fecharModalAtalhos()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded w-full">Fechar [ESC]</button>
             </div>
         </div>
     </div>
@@ -177,26 +209,104 @@
 <script>
 let carrinho = [];
 let processando = false;
+let indiceSelecionado = -1;
 const CAIXA_ABERTO = {{ $caixaAberto ? 'true' : 'false' }};
 
-// Atalhos
+console.log('PDV CAIXA CARREGOU');
+
+// Atalhos globais
 document.addEventListener('keydown', (e) => {
+    // Modal Abrir Caixa
+    if (!CAIXA_ABERTO && !document.getElementById('modal-abrir-caixa').classList.contains('hidden')) {
+        if (e.key === 'Enter') { e.preventDefault(); abrirCaixa(); }
+        if (e.key === 'Escape') { e.preventDefault(); window.location.href = '{{ url('/dashboard') }}'; }
+        if (e.key === 'F5') { e.preventDefault(); document.getElementById('valor-inicial').focus(); }
+        return;
+    }
+
     if (!CAIXA_ABERTO) return;
+    
+    // Atalhos principais
     if (e.key === 'F1') { e.preventDefault(); document.getElementById('busca-produto').focus(); }
     if (e.key === 'F2') { e.preventDefault(); document.getElementById('busca-cliente').focus(); }
+    if (e.key === 'F3') { e.preventDefault(); document.getElementById('desconto-valor').focus(); }
+    if (e.key === 'F4') { e.preventDefault(); document.getElementById('forma-pagamento').focus(); }
+    if (e.key === 'F8') { e.preventDefault(); verRelatorio(); }
+    if (e.key === 'F9') { e.preventDefault(); abrirModalAtalhos(); }
+    if (e.key === 'F10') { e.preventDefault(); fecharCaixa(); }
     if (e.key === 'F12') { e.preventDefault(); if (!document.getElementById('btn-finalizar').disabled) finalizarVenda(); }
-    if (e.key === 'Escape') { e.preventDefault(); if (!processando) limparVenda(); }
+    if (e.key === 'Escape') { 
+        e.preventDefault(); 
+        if (!document.getElementById('modalAtalhos').classList.contains('hidden')) {
+            fecharModalAtalhos();
+        } else if (!document.getElementById('modal-relatorio').classList.contains('hidden')) {
+            fecharModalRelatorio();
+        } else if (!processando) {
+            limparVenda(); 
+        }
+    }
 });
+
+// Navegação por setas na busca de produto
+document.getElementById('busca-produto')?.addEventListener('keydown', function(e) {
+    const itens = document.querySelectorAll('.lista-produto-item');
+    if (itens.length === 0) return;
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        indiceSelecionado = Math.min(indiceSelecionado + 1, itens.length - 1);
+        atualizarSelecao(itens);
+    }
+    if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        indiceSelecionado = Math.max(indiceSelecionado - 1, 0);
+        atualizarSelecao(itens);
+    }
+    if (e.key === 'Enter' && indiceSelecionado >= 0) {
+        e.preventDefault();
+        itens[indiceSelecionado]?.click();
+        indiceSelecionado = -1;
+    }
+});
+
+function atualizarSelecao(itens) {
+    itens.forEach((item, i) => {
+        if (i === indiceSelecionado) {
+            item.classList.add('bg-blue-600');
+            item.scrollIntoView({block: 'nearest'});
+        } else {
+            item.classList.remove('bg-blue-600');
+        }
+    });
+}
+
+function abrirModalAtalhos() {
+    document.getElementById('modalAtalhos').classList.remove('hidden');
+}
+
+function fecharModalAtalhos() {
+    document.getElementById('modalAtalhos').classList.add('hidden');
+}
 
 // Abrir Caixa
 async function abrirCaixa() {
     const valor = parseFloat(document.getElementById('valor-inicial').value) || 0;
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'ABRINDO...';
+    
     const res = await fetch('{{ route('caixa.abrir') }}', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({valor_inicial: valor})
     });
-    if (res.ok) location.reload();
+    if (res.ok) {
+        location.reload();
+    } else {
+        alert('Erro ao abrir caixa');
+        btn.disabled = false;
+        btn.textContent = 'ABRIR CAIXA';
+    }
 }
 
 // Fechar Caixa
@@ -212,6 +322,7 @@ function fecharCaixa() {
         `;
         document.getElementById('resumo-caixa').innerHTML = resumo;
         document.getElementById('modal-fechar-caixa').classList.remove('hidden');
+        document.getElementById('valor-final').focus();
     });
 }
 
@@ -245,13 +356,14 @@ document.getElementById('busca-produto')?.addEventListener('input', async (e) =>
         document.getElementById('resultado-produtos').classList.add('hidden');
         return;
     }
-    const res = await fetch(`{{ route('caixa.buscar-produto') }}?q=${termo}`);
+    const res = await fetch(`{{ route('caixa.buscar-produto') }}?q=${encodeURIComponent(termo)}`);
     const produtos = await res.json();
     const div = document.getElementById('resultado-produtos');
     div.innerHTML = '';
+    indiceSelecionado = -1;
     produtos.forEach(p => {
         const item = document.createElement('div');
-        item.className = 'px-4 py-3 hover:bg-gray-600 cursor-pointer border-b border-gray-600 active:bg-gray-500';
+        item.className = 'lista-produto-item px-4 py-3 hover:bg-gray-600 cursor-pointer border-b border-gray-600 active:bg-gray-500';
         item.innerHTML = `<strong>${p.ref}</strong> - ${p.label}<br><span class="text-green-400 font-bold">R$ ${parseFloat(p.price || 0).toFixed(2)}</span>`;
         item.onclick = () => adicionarProduto(p);
         div.appendChild(item);
@@ -366,7 +478,7 @@ document.getElementById('busca-cliente')?.addEventListener('input', async (e) =>
         document.getElementById('resultado-clientes').classList.add('hidden');
         return;
     }
-    const res = await fetch(`{{ route('caixa.buscar-cliente') }}?q=${termo}`);
+    const res = await fetch(`{{ route('caixa.buscar-cliente') }}?q=${encodeURIComponent(termo)}`);
     const clientes = await res.json();
     const div = document.getElementById('resultado-clientes');
     div.innerHTML = '';
@@ -433,17 +545,85 @@ async function finalizarVenda() {
     }
 }
 
+// Relatório bonito F8
 function verRelatorio() {
     fetch('{{ route('caixa.relatorio') }}').then(r => r.json()).then(c => {
         if (c) {
-            alert(`CAIXA DO DIA\n\nVendas: R$ ${parseFloat(c.total_vendas).toFixed(2)}\nDinheiro: R$ ${parseFloat(c.total_dinheiro).toFixed(2)}\nPIX: R$ ${parseFloat(c.total_pix).toFixed(2)}\nDébito: R$ ${parseFloat(c.total_debito).toFixed(2)}\nCrédito: R$ ${parseFloat(c.total_credito).toFixed(2)}`);
+            const dataAbertura = new Date(c.aberto_em).toLocaleString('pt-BR');
+            const html = `
+                <div class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" id="modal-relatorio">
+                    <div class="bg-gray-800 rounded-lg p-6 w-full max-w-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold text-green-400">RELATÓRIO DO CAIXA</h2>
+                            <button onclick="fecharModalRelatorio()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                        
+                        <div class="space-y-3 text-lg">
+                            <div class="bg-gray-700 rounded p-3">
+                                <div class="text-xs text-gray-400">ABERTO EM</div>
+                                <div class="font-bold">${dataAbertura}</div>
+                            </div>
+                            
+                            <div class="bg-gray-700 rounded p-3">
+                                <div class="text-xs text-gray-400">VALOR INICIAL</div>
+                                <div class="font-bold text-blue-400">R$ ${parseFloat(c.valor_inicial).toFixed(2)}</div>
+                            </div>
+
+                            <div class="border-t border-gray-600 pt-3">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-gray-400">Total Vendas:</span>
+                                    <span class="font-bold text-green-400">R$ ${parseFloat(c.total_vendas).toFixed(2)}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">Dinheiro:</span>
+                                    <span>R$ ${parseFloat(c.total_dinheiro).toFixed(2)}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">PIX:</span>
+                                    <span>R$ ${parseFloat(c.total_pix).toFixed(2)}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">Débito:</span>
+                                    <span>R$ ${parseFloat(c.total_debito).toFixed(2)}</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-400">Crédito:</span>
+                                    <span>R$ ${parseFloat(c.total_credito).toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-gray-600 pt-3">
+                                <div class="flex justify-between text-sm text-gray-400">
+                                    <span>Sangrias:</span>
+                                    <span>R$ 0,00</span>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-400">
+                                    <span>Suprimentos:</span>
+                                    <span>R$ 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="fecharModalRelatorio()" class="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg font-bold">
+                            FECHAR [ESC]
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', html);
         }
     });
+}
+
+function fecharModalRelatorio() {
+    document.getElementById('modal-relatorio')?.remove();
 }
 
 // Foca na busca ao carregar
 if (CAIXA_ABERTO) {
     document.getElementById('busca-produto')?.focus();
+} else {
+    document.getElementById('valor-inicial')?.focus();
 }
 </script>
 
