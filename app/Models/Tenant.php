@@ -16,6 +16,8 @@ class Tenant extends Model
         'dolibarr_url',
         'plan',
         'api_key',
+        'dolibarr_warehouse_id',
+        'dolibarr_societe_id',
     ];
 
     protected $casts = [

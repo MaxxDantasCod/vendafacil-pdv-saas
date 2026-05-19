@@ -14,15 +14,24 @@
                         @csrf
 
                         @if(session('error'))
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ session('error') }}
-    </div>
-@endif
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
                         <div class="mb-4">
-                            <label for="ref_loja" class="block text-sm font-medium text-gray-700">Referência / Código</label>
+                            <label for="ref_loja" class="block text-sm font-medium text-gray-700">SKU</label>
                             <input type="text" name="ref_loja" id="ref_loja" value="{{ old('ref_loja') }}" 
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                             <p class="text-xs text-gray-500 mt-1">Código interno da sua loja. Ex: CAMISA-AZUL</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="barcode" class="block text-sm font-medium text-gray-700">Código de Barras</label>
+                            <input type="text" name="barcode" id="barcode" value="{{ old('barcode') }}" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" 
+                                   placeholder="7891000100103">
+                            <p class="text-xs text-gray-500 mt-1">Opcional. EAN-13, EAN-8, UPC, etc.</p>
                         </div>
 
                         <div class="mb-4">

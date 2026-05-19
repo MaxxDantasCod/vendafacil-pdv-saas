@@ -2,7 +2,8 @@
     $nav = [
         ['route' => 'dashboard', 'label' => __('Dashboard'), 'icon' => 'home'],
 //      ['route' => 'pdv.show', 'label' => __('PDV'), 'icon' => 'pos'],
-        ['route' => 'pdv.index', 'label' => __('PDV'), 'icon' => 'pos'],
+//      ['route' => 'pdv.index', 'label' => __('PDV'), 'icon' => 'pos'],
+        ['route' => 'caixa.index', 'label' => __('PDV'), 'icon' => 'pos'],
         ['route' => 'produtos.index', 'label' => __('Produtos'), 'icon' => 'box'],
         ['route' => 'clientes.index', 'label' => __('Clientes'), 'icon' => 'users'],
         ['route' => 'reports.index', 'label' => __('Relatórios'), 'icon' => 'chart'],

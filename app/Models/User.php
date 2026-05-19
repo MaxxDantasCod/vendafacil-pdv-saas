@@ -25,13 +25,17 @@ class User extends Authenticatable
     'tenant_id', // ← importante
 ];
 
-    /**
+    public function tenant()
+    {
+    return $this->belongsTo(Tenant::class);
+    }
+ /*   /**
      * Tenant associado pelo mesmo e-mail (cadastro em `tenants`).
-     */
+     
     public function tenant(): HasOne
     {
         return $this->hasOne(Tenant::class, 'email', 'email');
-    }
+    } */
 
     /**
      * The attributes that should be hidden for serialization.

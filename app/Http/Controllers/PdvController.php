@@ -13,42 +13,83 @@ class PdvController extends Controller
     }
 
     public function buscarProduto(Request $request)
-    {
-        $termo = $request->input('termo');
-        $url = env('DOLIBARR_BASE_URL'). '/api/index.php/products';
-
-        $response = Http::withHeaders([
-            'DOLAPIKEY' => env('DOLIBARR_API_KEY')
-        ])->get($url, [
-            'sqlfilters' => "(t.ref:like:'%".$termo."%') or (t.label:like:'%".$termo."%')",
-            'limit' => 10
-        ]);
-
-        if ($response->successful()) {
-            return response()->json($response->json());
-        }
-
-        return response()->json(['error' => 'Erro ao buscar produtos'], 500);
+{
+    $termo = $request->input('termo');
+    $user = auth()->user();
+    
+    // Lei 2: Superadmin vê tudo
+    // Lei 1: Lojista só vê da warehouse dele
+    $warehouseId = $user->is_superadmin ? null : $user->tenant->dolibarr_warehouse_id;
+    
+    if (!$user->is_superadmin && !$warehouseId) {
+        return response()->json(['error' => 'Loja sem armazém configurado no Dolibarr'], 403);
     }
+
+    $url = env('DOLIBARR_BASE_URL'). '/api/index.php/products';
+    
+    // Filtro base: busca por ref ou label
+    $sqlFilter = "(t.ref:like:'%".$termo."%') or (t.label:like:'%".$termo."%')";
+    
+    // Adiciona filtro de armazém se não for superadmin
+    if ($warehouseId) {
+        $sqlFilter = "(" . $sqlFilter . ") and (t.fk_warehouse:=:'" . $warehouseId . "')";
+    }
+
+    $response = Http::withHeaders([
+        'DOLAPIKEY' => env('DOLIBARR_API_KEY')
+    ])->get($url, [
+        'sqlfilters' => $sqlFilter,
+        'limit' => 10
+    ]);
+
+    if ($response->successful()) {
+        return response()->json($response->json());
+    }
+
+    return response()->json(['error' => 'Erro ao buscar produtos'], 500);
+}
 
     public function buscarCliente(Request $request)
-    {
-        $termo = $request->input('termo');
-        $url = env('DOLIBARR_BASE_URL'). '/api/index.php/thirdparties';
+{
+    // DEBUG - APAGA DEPOIS QUE TESTAR
+    dd([
+        'user_id' => auth()->id(),
+        'is_superadmin' => auth()->user()->is_superadmin,
+        'tenant_id' => auth()->user()->tenant_id,
+        'dolibarr_tenant_id' => optional(auth()->user()->tenant)->dolibarr_tenant_id,
+        'termo' => $request->input('termo')
+    ]);
 
-        $response = Http::withHeaders([
-            'DOLAPIKEY' => env('DOLIBARR_API_KEY')
-        ])->get($url, [
-            'sqlfilters' => "(t.nom:like:'%".$termo."%')",
-            'limit' => 10
-        ]);
-
-        if ($response->successful()) {
-            return response()->json($response->json());
-        }
-
-        return response()->json(['error' => 'Erro ao buscar clientes'], 500);
+    $termo = $request->input('termo');
+    $user = auth()->user();
+    
+    $lojaId = $user->is_superadmin ? null : optional($user->tenant)->dolibarr_tenant_id;
+    
+    if (!$user->is_superadmin && !$lojaId) {
+        return response()->json(['error' => 'Loja sem vínculo de clientes no Dolibarr'], 403);
     }
+
+    $url = env('DOLIBARR_BASE_URL'). '/api/index.php/thirdparties';
+    
+    $sqlFilter = "(t.nom:like:'%".$termo."%') or (t.name_alias:like:'%".$termo."%')";
+    
+    if ($lojaId) {
+        $sqlFilter = "(" . $sqlFilter . ") and (ef.loja_id:=:'" . $lojaId . "')";
+    }
+
+    $response = Http::withHeaders([
+        'DOLAPIKEY' => env('DOLIBARR_API_KEY')
+    ])->get($url, [
+        'sqlfilters' => $sqlFilter,
+        'limit' => 10
+    ]);
+
+    if ($response->successful()) {
+        return response()->json($response->json());
+    }
+
+    return response()->json(['error' => 'Erro ao buscar clientes'], 500);
+}
 
 public function finalizarVenda(Request $request)
 {
