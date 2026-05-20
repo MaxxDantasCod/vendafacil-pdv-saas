@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\Caixa;
+use App\Models\CaixaMovimento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 class CaixaController extends Controller
 {
@@ -63,16 +68,58 @@ class CaixaController extends Controller
         return response()->json(['success' => true, 'caixa' => $caixa]);
     }
 
-    public function relatorioDia()
-    {
+public function relatorioDia()
+{
+    try {
         $user = auth()->user();
-        $caixa = Caixa::where('user_id', $user->id)
+        
+        $query = Caixa::where('user_id', $user->id)
             ->whereDate('aberto_em', today())
-            ->latest()
-            ->first();
+            ->latest();
+
+        // Só filtra por tenant se a coluna existir
+        if (Schema::hasColumn('caixas', 'tenant_id')) {
+            $query->where('tenant_id', $user->tenant_id);
+        }
+
+        $caixa = $query->first();
+
+        if (!$caixa) {
+            return response()->json(['error' => 'Nenhum caixa aberto hoje'], 404);
+        }
+
+        // Sangria
+        $caixa->total_sangria = CaixaMovimento::where('caixa_id', $caixa->id)
+            ->where('tipo', 'sangria')
+            ->when(Schema::hasColumn('caixa_movimentos', 'tenant_id'), function ($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id);
+            })
+            ->sum('valor');
+
+        // Suprimento  
+        $caixa->total_suprimento = CaixaMovimento::where('caixa_id', $caixa->id)
+            ->where('tipo', 'suprimento')
+            ->when(Schema::hasColumn('caixa_movimentos', 'tenant_id'), function ($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id);
+            })
+            ->sum('valor');
+
+        // Se tiver Invoice, calcula vendas. Se não, pula.
+        if (class_exists('App\Models\Invoice')) {
+            $caixa->total_vendas = Invoice::where('caixa_id', $caixa->id)->sum('total');
+            $caixa->total_dinheiro = Invoice::where('caixa_id', $caixa->id)->where('forma_pagamento', 'dinheiro')->sum('total');
+            $caixa->total_pix = Invoice::where('caixa_id', $caixa->id)->where('forma_pagamento', 'pix')->sum('total');
+            $caixa->total_debito = Invoice::where('caixa_id', $caixa->id)->where('forma_pagamento', 'debito')->sum('total');
+            $caixa->total_credito = Invoice::where('caixa_id', $caixa->id)->where('forma_pagamento', 'credito')->sum('total');
+        }
 
         return response()->json($caixa);
+
+    } catch (\Exception $e) {
+        Log::error('Erro relatorioDia: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
     // BUSCA PRODUTO - Usa vínculo local igual ProdutoController
 public function buscarProduto(Request $request)
@@ -164,6 +211,105 @@ public function buscarCliente(Request $request)
     }
 
     return response()->json(array_values($clientes));
+}
+
+    // SANGRIA E SUPRIMENTOS
+
+public function sangria(Request $request)
+{
+    \Log::info('Sangria chamada', ['user_id' => auth()->id(), 'valor' => $request->valor]);
+    
+    if (!auth()->check()) {
+        return response()->json(['error' => 'Usuário não autenticado'], 401);
+    }
+    
+    $request->validate([
+        'valor' => 'required|numeric|min:0.01',
+        'obs' => 'nullable|string|max:255'
+    ]);
+
+    $user = auth()->user();
+    $caixa = Caixa::where('user_id', $user->id)
+        ->where('tenant_id', $user->tenant_id)
+        ->where('status', 'aberto')
+        ->first();
+
+    if (!$caixa) {
+        return response()->json(['error' => 'Abra o caixa antes de fazer sangria'], 400);
+    }
+
+    $valor = (float)$request->valor;
+
+    if ($caixa->total_dinheiro < $valor) {
+        return response()->json(['error' => 'Valor de sangria maior que o disponível em dinheiro'], 400);
+    }
+
+    try {
+        DB::transaction(function () use ($caixa, $valor, $user, $request) {
+            $caixa->increment('total_sangria', $valor);
+            $caixa->decrement('total_dinheiro', $valor);
+
+            CaixaMovimento::create([
+                'caixa_id' => $caixa->id,
+                'user_id' => $user->id,
+                'tenant_id' => $caixa->tenant_id,
+                'tipo' => 'sangria',
+                'valor' => $valor,
+                'forma_pagamento' => 'dinheiro',
+                'invoice_id' => null,
+                'obs' => $request->obs ?? 'Sangria PDV'
+            ]);
+        });
+
+        return response()->json(['success' => true, 'message' => 'Sangria realizada com sucesso']);
+
+    } catch (\Exception $e) {
+        \Log::error('Erro sangria: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+        return response()->json(['error' => 'Erro ao processar sangria: ' . $e->getMessage()], 500);
+    }
+}
+public function suprimento(Request $request)
+{
+    $request->validate([
+        'valor' => 'required|numeric|min:0.01',
+        'obs' => 'nullable|string|max:255'
+    ]);
+
+    $user = auth()->user();
+    $caixa = Caixa::where('user_id', $user->id)
+        ->where('tenant_id', $user->tenant_id)
+        ->where('status', 'aberto')
+        ->first();
+
+    if (!$caixa) {
+        return response()->json(['error' => 'Abra o caixa antes de fazer suprimento'], 400);
+    }
+
+    $valor = (float)$request->valor;
+
+    try {
+        DB::transaction(function () use ($caixa, $valor, $user, $request) {
+            $caixa->increment('total_suprimento', $valor);
+            $caixa->increment('total_dinheiro', $valor);
+
+            CaixaMovimento::create([
+                'caixa_id' => $caixa->id,
+                'user_id' => $user->id,
+                'tenant_id' => $caixa->tenant_id,
+                'tipo' => 'suprimento',
+                'valor' => $valor,
+                'forma_pagamento' => 'dinheiro',
+                'invoice_id' => null,
+                'obs' => $request->obs ?? 'Suprimento PDV'
+            ]);
+        });
+
+        return response()->json(['success' => true, 'message' => 'Suprimento realizado com sucesso']);
+
+    } catch (\Exception $e) {
+        \Log::error('Erro suprimento: ' . $e->getMessage());
+        return response()->json(['error' => 'Erro ao processar suprimento'], 500);
+    }
 }
     // FINALIZAR VENDA - Copiado do PdvController + atualiza caixa
     public function finalizarVenda(Request $request)

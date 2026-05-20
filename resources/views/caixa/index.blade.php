@@ -9,17 +9,19 @@
     <style>
         * { -webkit-tap-highlight-color: transparent; }
         body { overscroll-behavior: none; }
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
         kbd { font-family: monospace; font-size: 0.9em; }
-        .lista-produto-item.bg-blue-600 { background-color: rgb(37 99 235)!important; }
+      .lista-produto-item.bg-blue-600 { background-color: rgb(37 99 235)!important; }
+        [x-cloak] { display: none!important; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 select-none">
-    
+
+<body x-data="{ modalSangria: false, modalSuprimento: false, menuOpcoesF8: false, opcaoF8: 0 }" class="bg-gray-900 text-gray-100 select-none">
+
     <!-- Modal Abrir Caixa -->
     @if(!$caixaAberto)
     <div id="modal-abrir-caixa" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
@@ -29,7 +31,7 @@
             <input type="number" id="valor-inicial" step="0.01" min="0" placeholder="0,00"
                    class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 text-gray-100 px-4 py-4 text-3xl text-center mb-4"
                    autofocus>
-            <button onclick="abrirCaixa()" 
+            <button onclick="abrirCaixa()"
                     class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg text-xl">
                 ENTER - ABRIR CAIXA
             </button>
@@ -38,32 +40,41 @@
     </div>
     @endif
 
-    <!-- Header Fixo -->
-    <div class="bg-gray-800 border-b-2 border-gray-700 sticky top-0 z-40">
-        <div class="flex items-center justify-between px-3 py-2">
-            <div class="flex items-center gap-2">
-                <button onclick="toggleFullscreen()" class="p-2 hover:bg-gray-700 rounded-lg">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-                </button>
-                <span class="text-sm font-bold text-green-400">CAIXA ABERTO <span class="text-xs text-gray-500">[F9=Atalhos]</span></span>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="verRelatorio()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-bold">
-                    F8 - RELATÓRIO
-                </button>
-                <button onclick="fecharCaixa()" class="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold">
-                    F10 - FECHAR
-                </button>
-            </div>
+<!-- Header Fixo -->
+<div class="bg-gray-800 border-b border-gray-700 px-4 py-3">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <h4 class="text-xl font-bold m-0">
+                CAIXA ABERTO <small class="text-gray-400">[F9=Atalhos]</small>
+            </h4>
+        </div>
+        <div class="flex gap-2">
+            <button type="button" onclick="abrirSangria()"
+                    class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                F6 - SANGRIA
+            </button>
+            <button type="button" onclick="abrirSuprimento()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                F7 - SUPRIMENTO
+            </button>
+            <button type="button" @click="menuOpcoesF8 = true; opcaoF8 = 0"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-sm">
+    F8 - OPÇÕES
+</button>
+            <button type="button" id="btnFechar"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                F10 - FECHAR
+            </button>
         </div>
     </div>
+</div>
 
     <!-- Conteúdo Principal -->
     <div class="lg:grid lg:grid-cols-3 lg:gap-4 lg:p-4 p-2">
-        
+
         <!-- Coluna Busca + Carrinho -->
         <div class="lg:col-span-2 space-y-3">
-            
+
             <!-- Busca Produto -->
             <div class="bg-gray-800 rounded p-3 relative">
                 <label class="block text-sm font-bold mb-1 text-gray-400">F1 - BUSCAR PRODUTO</label>
@@ -99,11 +110,11 @@
 
         <!-- Coluna Cliente + Total -->
         <div class="lg:col-span-1 space-y-3 mt-3 lg:mt-0">
-            
+
             <!-- Cliente -->
             <div class="bg-gray-800 rounded-lg p-3 lg:p-4">
                 <label class="block text-lg font-bold mb-2">F2 - Cliente</label>
-                <input type="text" id="busca-cliente" 
+                <input type="text" id="busca-cliente"
                        placeholder="Nome ou CPF..."
                        class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 text-gray-100 px-4 py-3 text-lg"
                        autocomplete="off">
@@ -114,7 +125,7 @@
 
             <!-- Totais -->
             <div class="bg-gray-800 rounded-lg p-3 lg:p-4 space-y-3">
-                
+
                 <div class="flex justify-between text-lg">
                     <span class="text-gray-400">Subtotal:</span>
                     <span id="subtotal-venda" class="font-bold">R$ 0,00</span>
@@ -149,12 +160,12 @@
                     <p class="text-lg text-gray-400">TOTAL</p>
                     <p id="total-venda" class="text-5xl lg:text-6xl font-extrabold text-green-400">R$ 0,00</p>
                 </div>
-                
+
                 <button id="btn-finalizar" onclick="finalizarVenda()" disabled
                         class="w-full rounded-lg bg-green-600 px-4 py-4 text-2xl font-bold disabled:bg-gray-600 disabled:cursor-not-allowed active:bg-green-800">
                     F12 - FINALIZAR
                 </button>
-                <button onclick="limparVenda()" 
+                <button onclick="limparVenda()"
                         class="w-full rounded-lg bg-red-600 px-4 py-3 text-lg font-bold active:bg-red-800">
                     ESC - CANCELAR
                 </button>
@@ -173,7 +184,9 @@
                     <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F3</kbd></td><td>Desconto</td></tr>
                     <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F4</kbd></td><td>Forma Pagamento</td></tr>
                     <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F5</kbd></td><td>Abrir Caixa</td></tr>
-                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F8</kbd></td><td>Relatorio Detalhado</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F6</kbd></td><td>Sangria</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F7</kbd></td><td>Suprimento</td></tr>
+                    <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F8</kbd></td><td>Menu Opções</td></tr>
                     <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F10</kbd></td><td>Fechar Caixa</td></tr>
                     <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">F12</kbd></td><td>Finalizar Venda</td></tr>
                     <tr><td class="py-1"><kbd class="bg-gray-700 px-2 rounded">ESC</kbd></td><td>Cancelar</td></tr>
@@ -195,29 +208,126 @@
                    class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 px-4 py-3 text-xl mb-3">
             <textarea id="obs-fechamento" placeholder="Observações" rows="2"
                       class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 px-4 py-2 mb-3"></textarea>
-            <button onclick="confirmarFecharCaixa()" 
+            <button onclick="confirmarFecharCaixa()"
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-lg text-xl mb-2">
                 CONFIRMAR FECHAMENTO
             </button>
-            <button onclick="document.getElementById('modal-fechar-caixa').classList.add('hidden')" 
+            <button onclick="document.getElementById('modal-fechar-caixa').classList.add('hidden')"
                     class="w-full bg-gray-600 text-white py-2 rounded-lg">
                 Cancelar
             </button>
         </div>
     </div>
 
+<!-- Modal Sangria -->
+<div x-show="modalSangria" 
+     x-transition 
+     @keydown.escape.window="modalSangria = false" 
+     x-cloak
+     class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+     style="display: none;">
+    <div @click.away="modalSangria = false" class="bg-gray-800 rounded-lg p-6 w-full max-w-sm">
+        <h2 class="text-2xl font-bold mb-4 text-center">F6 - SANGRIA</h2>
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Valor da Sangria</label>
+            <input type="number" id="sangria_valor" step="0.01" min="0" placeholder="0,00"
+                   class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 text-gray-100 px-4 py-3 text-xl"
+                   @keydown.enter="confirmarSangria()">
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Observação</label>
+            <input type="text" id="sangria_obs" placeholder="Motivo da retirada"
+                   class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 text-gray-100 px-4 py-2">
+        </div>
+        <div class="flex gap-2">
+            <button @click="modalSangria = false"
+                    class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded-lg">
+                ESC - Cancelar
+            </button>
+            <button @click="confirmarSangria()"
+                    class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">
+                ENTER - Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Suprimento -->
+<div x-show="modalSuprimento" 
+     x-transition 
+     @keydown.escape.window="modalSuprimento = false" 
+     x-cloak
+     class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+     style="display: none;">
+    <div @click.away="modalSuprimento = false" class="bg-gray-800 rounded-lg p-6 w-full max-w-sm">
+        <h2 class="text-2xl font-bold mb-4 text-center">F7 - SUPRIMENTO</h2>
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Valor do Suprimento</label>
+            <input type="number" id="suprimento_valor" step="0.01" min="0" placeholder="0,00"
+                   class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 text-gray-100 px-4 py-3 text-xl"
+                   @keydown.enter="confirmarSuprimento()">
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm text-gray-400 mb-1">Observação</label>
+            <input type="text" id="suprimento_obs" placeholder="Origem do valor"
+                   class="w-full rounded-lg border-2 border-gray-600 bg-gray-700 text-gray-100 px-4 py-2">
+        </div>
+        <div class="flex gap-2">
+            <button @click="modalSuprimento = false"
+                    class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded-lg">
+                ESC - Cancelar
+            </button>
+            <button @click="confirmarSuprimento()"
+                    class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">
+                ENTER - Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Menu F8 -->
+<div x-show="menuOpcoesF8" 
+     x-transition
+     @keydown.window.escape="menuOpcoesF8 = false"
+     @keydown.window.arrow-down.prevent="opcaoF8 = Math.min(opcaoF8 + 1, 2)"
+     @keydown.window.arrow-up.prevent="opcaoF8 = Math.max(opcaoF8 - 1, 0)"
+     @keydown.window.enter.prevent="executarF8()"
+     class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" 
+     style="display: none;">
+    <div @click.away="menuOpcoesF8 = false" class="bg-gray-800 rounded-lg p-6 w-full max-w-sm border-2 border-blue-500">
+        <h3 class="text-xl font-bold mb-4 text-center">F8 - OPÇÕES</h3>
+        <div class="space-y-2">
+            <button @click="verRelatorio(); menuOpcoesF8 = false" 
+                    :class="opcaoF8 === 0? 'bg-blue-600 ring-2 ring-blue-400' : 'bg-gray-700'"
+                    class="w-full text-left px-4 py-3 rounded-lg font-bold hover:bg-blue-600">
+                1. RELATÓRIO COMPLETO
+            </button>
+            <button @click="abrirSangria(); menuOpcoesF8 = false" 
+                    :class="opcaoF8 === 1? 'bg-yellow-600 ring-2 ring-yellow-400' : 'bg-gray-700'"
+                    class="w-full text-left px-4 py-3 rounded-lg font-bold hover:bg-yellow-600">
+                2. SANGRIA
+            </button>
+            <button @click="abrirSuprimento(); menuOpcoesF8 = false" 
+                    :class="opcaoF8 === 2? 'bg-blue-600 ring-2 ring-blue-400' : 'bg-gray-700'"
+                    class="w-full text-left px-4 py-3 rounded-lg font-bold hover:bg-blue-600">
+                3. SUPRIMENTOS
+            </button>
+        </div>
+        <p class="text-xs text-gray-400 text-center mt-4">↑↓ Navegar | ENTER Confirmar | ESC Cancelar</p>
+    </div>
+</div>
+
 <script>
 let carrinho = [];
 let processando = false;
 let indiceSelecionado = -1;
-const CAIXA_ABERTO = {{ $caixaAberto ? 'true' : 'false' }};
+const CAIXA_ABERTO = {{ $caixaAberto? 'true' : 'false' }};
 
 console.log('PDV CAIXA CARREGOU');
 
 // Atalhos globais
 document.addEventListener('keydown', (e) => {
-    // Modal Abrir Caixa
-    if (!CAIXA_ABERTO && !document.getElementById('modal-abrir-caixa').classList.contains('hidden')) {
+    if (!CAIXA_ABERTO &&!document.getElementById('modal-abrir-caixa').classList.contains('hidden')) {
         if (e.key === 'Enter') { e.preventDefault(); abrirCaixa(); }
         if (e.key === 'Escape') { e.preventDefault(); window.location.href = '{{ url('/dashboard') }}'; }
         if (e.key === 'F5') { e.preventDefault(); document.getElementById('valor-inicial').focus(); }
@@ -225,33 +335,125 @@ document.addEventListener('keydown', (e) => {
     }
 
     if (!CAIXA_ABERTO) return;
-    
-    // Atalhos principais
+
     if (e.key === 'F1') { e.preventDefault(); document.getElementById('busca-produto').focus(); }
     if (e.key === 'F2') { e.preventDefault(); document.getElementById('busca-cliente').focus(); }
     if (e.key === 'F3') { e.preventDefault(); document.getElementById('desconto-valor').focus(); }
     if (e.key === 'F4') { e.preventDefault(); document.getElementById('forma-pagamento').focus(); }
-    if (e.key === 'F8') { e.preventDefault(); verRelatorio(); }
+    if (e.key === 'F6') { e.preventDefault(); abrirSangria(); }
+    if (e.key === 'F7') { e.preventDefault(); abrirSuprimento(); }
+    if (e.key === 'F8') {
+    e.preventDefault();
+    Alpine.$data(document.body).menuOpcoesF8 = true;
+    Alpine.$data(document.body).opcaoF8 = 0;
+}
     if (e.key === 'F9') { e.preventDefault(); abrirModalAtalhos(); }
     if (e.key === 'F10') { e.preventDefault(); fecharCaixa(); }
     if (e.key === 'F12') { e.preventDefault(); if (!document.getElementById('btn-finalizar').disabled) finalizarVenda(); }
-    if (e.key === 'Escape') { 
-        e.preventDefault(); 
+    if (e.key === 'Escape') {
+        e.preventDefault();
         if (!document.getElementById('modalAtalhos').classList.contains('hidden')) {
             fecharModalAtalhos();
         } else if (!document.getElementById('modal-relatorio').classList.contains('hidden')) {
             fecharModalRelatorio();
         } else if (!processando) {
-            limparVenda(); 
+            limparVenda();
         }
     }
 });
+
+function executarF8() {
+    const opcao = Alpine.$data(document.body).opcaoF8;
+    Alpine.$data(document.body).menuOpcoesF8 = false;
+    
+    if (opcao === 0) verRelatorio();
+    if (opcao === 1) abrirSangria();
+    if (opcao === 2) abrirSuprimento();
+}
+
+function abrirSangria() {
+    Alpine.$data(document.body).modalSangria = true;
+    Alpine.$data(document.body).menuOpcoesF8 = false;
+    setTimeout(() => document.getElementById('sangria_valor')?.focus(), 100);
+}
+
+function abrirSuprimento() {
+    Alpine.$data(document.body).modalSuprimento = true;
+    Alpine.$data(document.body).menuOpcoesF8 = false;
+    setTimeout(() => document.getElementById('suprimento_valor')?.focus(), 100);
+}
+
+function confirmarSangria() {
+    const valor = document.getElementById('sangria_valor').value;
+    const obs = document.getElementById('sangria_obs').value;
+    if (!valor || parseFloat(valor) <= 0) {
+        alert('Informe um valor válido');
+        return;
+    }
+    fetch('{{ route("caixa.sangria") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ valor: valor, obs: obs })
+    })
+  .then(res => res.json())
+  .then(data => {
+        if (data.success) {
+            Alpine.$data(document.body).modalSangria = false;
+            document.getElementById('sangria_valor').value = '';
+            document.getElementById('sangria_obs').value = '';
+            alert('Sangria realizada: R$ ' + parseFloat(valor).toFixed(2));
+            location.reload();
+        } else {
+            alert(data.error || 'Erro ao fazer sangria');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Erro de rede ao fazer sangria');
+    });
+}
+
+function confirmarSuprimento() {
+    const valor = document.getElementById('suprimento_valor').value;
+    const obs = document.getElementById('suprimento_obs').value;
+    if (!valor || parseFloat(valor) <= 0) {
+        alert('Informe um valor válido');
+        return;
+    }
+    fetch('{{ route("caixa.suprimento") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ valor: valor, obs: obs })
+    })
+  .then(res => res.json())
+  .then(data => {
+        if (data.success) {
+            Alpine.$data(document.body).modalSuprimento = false;
+            document.getElementById('suprimento_valor').value = '';
+            document.getElementById('suprimento_obs').value = '';
+            alert('Suprimento realizado: R$ ' + parseFloat(valor).toFixed(2));
+            location.reload();
+        } else {
+            alert(data.error || 'Erro ao fazer suprimento');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Erro de rede ao fazer suprimento');
+    });
+}
 
 // Navegação por setas na busca de produto
 document.getElementById('busca-produto')?.addEventListener('keydown', function(e) {
     const itens = document.querySelectorAll('.lista-produto-item');
     if (itens.length === 0) return;
-    
+
     if (e.key === 'ArrowDown') {
         e.preventDefault();
         indiceSelecionado = Math.min(indiceSelecionado + 1, itens.length - 1);
@@ -294,7 +496,7 @@ async function abrirCaixa() {
     const btn = event.target;
     btn.disabled = true;
     btn.textContent = 'ABRINDO...';
-    
+
     const res = await fetch('{{ route('caixa.abrir') }}', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content},
@@ -337,15 +539,6 @@ async function confirmarFecharCaixa() {
     if (res.ok) {
         alert('Caixa fechado!');
         window.location.href = '{{ url('/dashboard') }}';
-    }
-}
-
-// Tela Cheia
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-    } else {
-        document.exitFullscreen();
     }
 }
 
@@ -393,7 +586,7 @@ function adicionarProduto(produto) {
 function renderCarrinho() {
     const tbody = document.getElementById('carrinho-itens');
     tbody.innerHTML = '';
-    
+
     if (carrinho.length === 0) {
         tbody.innerHTML = `<tr id="carrinho-vazio"><td colspan="4" class="px-4 py-8 text-center text-gray-400">Nenhum produto</td></tr>`;
         document.getElementById('subtotal-venda').textContent = 'R$ 0,00';
@@ -410,7 +603,7 @@ function renderCarrinho() {
             <tr class="active:bg-gray-700">
                 <td class="px-2 py-2 text-sm"><strong>${item.ref}</strong><br><span class="text-xs">${item.nome}</span></td>
                 <td class="px-2 py-2 text-center">
-                    <input type="number" value="${item.qtd}" min="1" 
+                    <input type="number" value="${item.qtd}" min="1"
                            onchange="alterarQtd(${idx}, this.value)"
                            class="w-16 text-center rounded border-2 border-gray-600 bg-gray-700 text-lg font-bold">
                 </td>
@@ -595,11 +788,11 @@ function verRelatorio() {
                             <div class="border-t border-gray-600 pt-3">
                                 <div class="flex justify-between text-sm text-gray-400">
                                     <span>Sangrias:</span>
-                                    <span>R$ 0,00</span>
+                                    <span>R$ ${parseFloat(c.total_sangria || 0).toFixed(2)}</span>
                                 </div>
                                 <div class="flex justify-between text-sm text-gray-400">
                                     <span>Suprimentos:</span>
-                                    <span>R$ 0,00</span>
+                                    <span>R$ ${parseFloat(c.total_suprimento || 0).toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>

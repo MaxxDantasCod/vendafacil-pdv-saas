@@ -38,21 +38,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/clientes/{id}', [App\Http\Controllers\ClienteController::class, 'destroy'])->name('clientes.destroy');
     // Rotas do PDV
     Route::get('/caixa', [App\Http\Controllers\CaixaController::class, 'index'])->name('caixa.index'); //Nova Rota para o PDV Isolado
-/*  Route::get('/pdv', [App\Http\Controllers\PdvController::class, 'index'])->name('pdv.index');
-    Route::get('/pdv/buscar-produto', [App\Http\Controllers\PdvController::class, 'buscarProduto'])->name('pdv.buscar-produto');
-    Route::get('/pdv/buscar-cliente', [App\Http\Controllers\PdvController::class, 'buscarCliente'])->name('pdv.buscar-cliente');
-//  Route::post('/pdv/finalizar', [App\Http\Controllers\PdvController::class, 'finalizarVenda'])->name('pdv.finalizar');
-    Route::post('/pdv/finalizar-venda', [App\Http\Controllers\PdvController::class, 'finalizarVenda'])->name('pdv.finalizar');
-    Route::get('/teste-tenant', function () {
-    if (!auth()->check()) return 'Não logado';
-    return 'Loja ID: ' . auth()->user()->tenant_id;
-})->middleware('auth');
-}); 
-
-    Route::get('/pdv', [App\Http\Controllers\PdvController::class, 'index'])->name('pdv.index');
-    Route::get('/pdv/buscar-produto', [App\Http\Controllers\PdvController::class, 'buscarProduto'])->name('pdv.buscar-produto');
-    Route::get('/pdv/buscar-cliente', [App\Http\Controllers\PdvController::class, 'buscarCliente'])->name('pdv.buscar-cliente');
-    Route::post('/pdv/finalizar-venda', [App\Http\Controllers\PdvController::class, 'finalizarVenda'])->name('pdv.finalizar'); */
     });
 
     Route::middleware(['auth', 'role:superadmin'])->group(function () {
@@ -68,7 +53,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // PDV ISOLADO - TELA CHEIA
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/caixa', [App\Http\Controllers\CaixaController::class, 'index'])->name('caixa.index');
     Route::post('/caixa/abrir', [App\Http\Controllers\CaixaController::class, 'abrir'])->name('caixa.abrir');
     Route::post('/caixa/fechar', [App\Http\Controllers\CaixaController::class, 'fechar'])->name('caixa.fechar');
@@ -78,5 +63,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/caixa/buscar-produto', [App\Http\Controllers\CaixaController::class, 'buscarProduto'])->name('caixa.buscar-produto');
     Route::get('/caixa/buscar-cliente', [App\Http\Controllers\CaixaController::class, 'buscarCliente'])->name('caixa.buscar-cliente');
     Route::post('/caixa/finalizar-venda', [App\Http\Controllers\CaixaController::class, 'finalizarVenda'])->name('caixa.finalizar');
+
+    // NOVO: Sangria e Suprimento
+    Route::post('/caixa/sangria', [App\Http\Controllers\CaixaController::class, 'sangria'])->name('caixa.sangria');
+    Route::post('/caixa/suprimento', [App\Http\Controllers\CaixaController::class, 'suprimento'])->name('caixa.suprimento');
 });
 require __DIR__.'/auth.php';
