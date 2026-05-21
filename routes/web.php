@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\TakePOSController;
+use App\Http\Controllers\TenantController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,10 +41,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/clientes/{id}', [App\Http\Controllers\ClienteController::class, 'update'])->name('clientes.update');
     Route::delete('/clientes/{id}', [App\Http\Controllers\ClienteController::class, 'destroy'])->name('clientes.destroy');
     // Rotas do PDV
-    Route::get('/caixa', [App\Http\Controllers\CaixaController::class, 'index'])->name('caixa.index'); //Nova Rota para o PDV Isolado
-    });
+    // O PDV isolado e APIs já são definidas abaixo no grupo auth/tenant
+});
 
-    Route::middleware(['auth', 'role:superadmin'])->group(function () {
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::resource('tenants', TenantController::class);
 });
 
@@ -67,5 +71,10 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     // NOVO: Sangria e Suprimento
     Route::post('/caixa/sangria', [App\Http\Controllers\CaixaController::class, 'sangria'])->name('caixa.sangria');
     Route::post('/caixa/suprimento', [App\Http\Controllers\CaixaController::class, 'suprimento'])->name('caixa.suprimento');
+
+    // Estoque local
+    Route::get('/estoque', [EstoqueController::class, 'index'])->name('estoque.index');
+    Route::get('/estoque/{produto}/editar', [EstoqueController::class, 'edit'])->name('estoque.edit');
+    Route::put('/estoque/{produto}', [EstoqueController::class, 'update'])->name('estoque.update');
 });
 require __DIR__.'/auth.php';

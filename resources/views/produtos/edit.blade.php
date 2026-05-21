@@ -42,6 +42,13 @@
                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm" required>
                         </div>
 
+                        <div class="mb-4">
+                            <label for="stock_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estoque</label>
+                            <input type="number" step="1" min="0" name="stock_quantity" id="stock_quantity" value="{{ old('stock_quantity', $tenantVinculado->stock_quantity) }}" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm">
+                            <p class="text-xs text-gray-500 mt-1">Atualize a quantidade disponível no estoque local. Deixe em branco para não usar controle de estoque.</p>
+                        </div>
+
                         <!-- Código de Barras -->
                         <div class="mb-4">
                             <label for="barcode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Código de Barras</label>

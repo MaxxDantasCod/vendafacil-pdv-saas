@@ -84,6 +84,7 @@ class DolibarrService
         }
 
         $salesToday = 0;
+        $revenueToday = 0;
         $revenueMonth = 0;
         $countMonth = 0;
         $todayStr = $today->toDateString();
@@ -108,6 +109,7 @@ class DolibarrService
 
             if ($dateOnly === $todayStr) {
                 $salesToday++;
+                $revenueToday += (int) round($total * 100);
             }
 
             if ($dateOnly >= $monthStart->toDateString() && $dateOnly <= $monthEnd->toDateString()) {
@@ -118,6 +120,7 @@ class DolibarrService
 
         return [
             'sales_today' => $salesToday,
+            'revenue_today_cents' => $revenueToday,
             'revenue_month_cents' => $revenueMonth,
             'invoice_count_month' => $countMonth,
         ];

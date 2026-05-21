@@ -5,6 +5,7 @@
 //      ['route' => 'pdv.index', 'label' => __('PDV'), 'icon' => 'pos'],
         ['route' => 'caixa.index', 'label' => __('PDV'), 'icon' => 'pos'],
         ['route' => 'produtos.index', 'label' => __('Produtos'), 'icon' => 'box'],
+        ['route' => 'estoque.index', 'label' => __('Estoque'), 'icon' => 'archive'],
         ['route' => 'clientes.index', 'label' => __('Clientes'), 'icon' => 'users'],
         ['route' => 'reports.index', 'label' => __('Relatórios'), 'icon' => 'chart'],
     ];
@@ -73,6 +74,8 @@
                     <svg class="h-5 w-5 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 @elseif ($item['icon'] === 'users')
                     <svg class="h-5 w-5 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                @elseif ($item['icon'] === 'archive')
+                    <svg class="h-5 w-5 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0l-8 4-8-4m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6"/></svg>
                 @else
                     <svg class="h-5 w-5 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 @endif

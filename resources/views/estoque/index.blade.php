@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                Produtos
+                Estoque
             </h2>
-            <a href="{{ route('produtos.create') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Novo Produto
+            <a href="{{ route('produtos.index') }}" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Voltar aos Produtos
             </a>
         </div>
     </x-slot>
@@ -14,7 +14,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-
                     @if(session('success'))
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                             {{ session('success') }}
@@ -37,32 +36,26 @@
                                 @foreach($produtos as $produto)
                                     <tr>
                                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $produto['id'] ?? '-' }}</td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $produto['ref_loja'] ?? '-' }}</td>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $produto['ref_loja'] ?? $produto['ref'] ?? '-' }}</td>
                                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $produto['label'] ?? '-' }}</td>
                                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">R$ {{ number_format($produto['price'] ?? 0, 2, ',', '.') }}</td>
                                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
-                                            @if(isset($produto['stock_quantity']) && $produto['stock_quantity'] !== null)
-                                                {{ $produto['stock_quantity'] }}
+                                            @if($produto['stock_quantity'] === null)
+                                                <span class="text-sm text-gray-500">Sem controle</span>
                                             @else
-                                                <span class="text-gray-500">Sem controle</span>
+                                                {{ $produto['stock_quantity'] }}
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 flex gap-2">
-                                            <a href="{{ route('produtos.edit', $produto['id']) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Editar</a>
-                                            <form method="POST" action="{{ route('produtos.destroy', $produto['id']) }}" onsubmit="return confirm('Tem certeza?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">Excluir</button>
-                                            </form>
+                                            <a href="{{ route('estoque.edit', $produto['produto_local_id']) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Ajustar</a>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     @else
-                        <p class="text-gray-500 dark:text-gray-400 text-center py-4">Nenhum produto encontrado para esta loja.</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-center py-4">Nenhum item de estoque encontrado para esta loja.</p>
                     @endif
-
                 </div>
             </div>
         </div>

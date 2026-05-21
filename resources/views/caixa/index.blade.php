@@ -557,7 +557,8 @@ document.getElementById('busca-produto')?.addEventListener('input', async (e) =>
     produtos.forEach(p => {
         const item = document.createElement('div');
         item.className = 'lista-produto-item px-4 py-3 hover:bg-gray-600 cursor-pointer border-b border-gray-600 active:bg-gray-500';
-        item.innerHTML = `<strong>${p.ref}</strong> - ${p.label}<br><span class="text-green-400 font-bold">R$ ${parseFloat(p.price || 0).toFixed(2)}</span>`;
+        const stockLabel = p.stock_quantity !== null && p.stock_quantity !== undefined ? ` <span class="text-xs text-gray-300">Estoque: ${p.stock_quantity}</span>` : '';
+        item.innerHTML = `<strong>${p.ref}</strong> - ${p.label}${stockLabel}<br><span class="text-green-400 font-bold">R$ ${parseFloat(p.price || 0).toFixed(2)}</span>`;
         item.onclick = () => adicionarProduto(p);
         div.appendChild(item);
     });
@@ -565,8 +566,19 @@ document.getElementById('busca-produto')?.addEventListener('input', async (e) =>
 });
 
 function adicionarProduto(produto) {
+    const available = produto.stock_quantity;
+
+    if (available !== null && available !== undefined && available <= 0) {
+        alert('Produto sem estoque disponível');
+        return;
+    }
+
     const existente = carrinho.find(i => i.id === produto.id);
     if (existente) {
+        if (available !== null && available !== undefined && existente.qtd + 1 > available) {
+            alert('Quantidade maior que o estoque disponível');
+            return;
+        }
         existente.qtd++;
     } else {
         carrinho.push({

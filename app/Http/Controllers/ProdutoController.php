@@ -28,6 +28,8 @@ class ProdutoController extends Controller
             if ($response->successful()) {
                 $produtoDoli = $response->json();
                 $produtoDoli['ref_loja'] = $vinculo->ref_loja;
+                $produtoDoli['stock_quantity'] = $vinculo->stock_quantity;
+                $produtoDoli['produto_local_id'] = $vinculo->id;
                 $produtos[] = $produtoDoli;
             }
         }
@@ -64,51 +66,58 @@ class ProdutoController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $tenantId = auth()->user()->tenant_id;
+    {
+        $tenantId = auth()->user()->tenant_id;
 
-    $vinculo = Produto::where('id_dolibarr', $id)
-        ->where('tenant_id', $tenantId)
-        ->firstOrFail();
+        $vinculo = Produto::where('id_dolibarr', $id)
+            ->where('tenant_id', $tenantId)
+            ->firstOrFail();
 
-    // Valida SKU duplicado na loja
-    if ($request->ref_loja && $request->ref_loja != $vinculo->ref_loja) {
-        $existeNaLoja = Produto::where('tenant_id', $tenantId)
-            ->where('ref_loja', $request->ref_loja)
-            ->where('id', '!=', $vinculo->id)
-            ->exists();
-
-        if ($existeNaLoja) {
-            return back()->withInput()->with('error', 'Já existe um produto com esse SKU na sua loja.');
-        }
-    }
-
-    // Atualiza no Dolibarr - SEM O REF
-    $response = Http::withHeaders([
-        'DOLAPIKEY' => env('DOLIBARR_API_KEY')
-    ])->put(env('DOLIBARR_BASE_URL') . "/api/index.php/products/{$id}", [
-        'label' => $request->label,
-        'price' => $request->price,
-        'barcode' => $request->barcode,
-    ]);
-
-    if ($response->failed()) {
-        Log::error('DOLIBARR UPDATE ERROR', [
-            'status' => $response->status(),
-            'body' => $response->json()
+        $request->validate([
+            'stock_quantity' => 'nullable|integer|min:0',
         ]);
-        return back()->with('error', 'Erro ao atualizar no Dolibarr: ' . $response->body());
+
+        // Valida SKU duplicado na loja
+        if ($request->ref_loja && $request->ref_loja != $vinculo->ref_loja) {
+            $existeNaLoja = Produto::where('tenant_id', $tenantId)
+                ->where('ref_loja', $request->ref_loja)
+                ->where('id', '!=', $vinculo->id)
+                ->exists();
+
+            if ($existeNaLoja) {
+                return back()->withInput()->with('error', 'Já existe um produto com esse SKU na sua loja.');
+            }
+        }
+
+        // Atualiza no Dolibarr - SEM O REF
+        $response = Http::withHeaders([
+            'DOLAPIKEY' => env('DOLIBARR_API_KEY')
+        ])->put(env('DOLIBARR_BASE_URL') . "/api/index.php/products/{$id}", [
+            'label' => $request->label,
+            'price' => $request->price,
+            'barcode' => $request->barcode,
+        ]);
+
+        if ($response->failed()) {
+            Log::error('DOLIBARR UPDATE ERROR', [
+                'status' => $response->status(),
+                'body' => $response->json()
+            ]);
+            return back()->with('error', 'Erro ao atualizar no Dolibarr: ' . $response->body());
+        }
+
+        // Atualiza SKU local e estoque
+        $vinculo->update([
+            'ref_loja' => $request->ref_loja,
+            'stock_quantity' => $request->filled('stock_quantity') ? $request->stock_quantity : null,
+        ]);
+
+        if (auth()->user()->role === 'admin' && $request->has('tenant_id')) {
+            $vinculo->update(['tenant_id' => $request->tenant_id]);
+        }
+
+        return redirect()->route('produtos.index')->with('success', 'Produto atualizado!');
     }
-
-    // Atualiza SKU local
-    $vinculo->update(['ref_loja' => $request->ref_loja]);
-
-    if (auth()->user()->role === 'admin' && $request->has('tenant_id')) {
-        $vinculo->update(['tenant_id' => $request->tenant_id]);
-    }
-
-    return redirect()->route('produtos.index')->with('success', 'Produto atualizado!');
-}
 
     public function create()
     {
@@ -122,6 +131,7 @@ class ProdutoController extends Controller
             'ref_loja' => 'nullable|string|max:128',
             'price' => 'required|numeric|min:0',
             'barcode' => 'nullable|string|max:255',
+            'stock_quantity' => 'nullable|integer|min:0',
         ]);
 
         $tenantId = auth()->user()->tenant_id;
@@ -168,6 +178,7 @@ class ProdutoController extends Controller
             'id_dolibarr' => $idDolibarr,
             'tenant_id'   => $tenantId,
             'ref_loja'    => $request->ref_loja,
+            'stock_quantity' => $request->filled('stock_quantity') ? $request->stock_quantity : null,
         ]);
 
         return redirect()->route('produtos.index')->with('success', 'Produto criado com sucesso!');

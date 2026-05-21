@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Caixa;
 use App\Models\CaixaMovimento;
+use App\Models\Produto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CaixaController extends Controller
 {
@@ -166,6 +168,7 @@ public function buscarProduto(Request $request)
             ->where('tenant_id', $tenantId)
             ->first();
         $p['ref_loja'] = $vinculo ? $vinculo->ref_loja : '';
+        $p['stock_quantity'] = $vinculo ? $vinculo->stock_quantity : null;
         return $p;
     }, $produtos);
 
@@ -366,7 +369,24 @@ public function suprimento(Request $request)
                 return response()->json(['error' => 'Erro ao criar fatura no Dolibarr'], 500);
             }
 
-            // 2. ADICIONA LINHAS
+            $produtosLocal = [];
+            foreach ($carrinho as $item) {
+                $produtoLocal = Produto::where('tenant_id', $user->tenant_id)
+                    ->where('id_dolibarr', $item['id'])
+                    ->first();
+
+                if (!$produtoLocal) {
+                    return response()->json(['error' => "Produto {$item['nome']} não está vinculado à sua loja."], 400);
+                }
+
+                if ($produtoLocal->stock_quantity !== null && $produtoLocal->stock_quantity < $item['qtd']) {
+                    return response()->json(['error' => "Estoque insuficiente para {$item['nome']}. Disponível: {$produtoLocal->stock_quantity}"], 400);
+                }
+
+                $produtosLocal[$item['id']] = $produtoLocal;
+            }
+
+            // 3. ADICIONA LINHAS
             $rang = 1;
             foreach ($carrinho as $item) {
                 Http::withHeaders(['DOLAPIKEY' => env('DOLIBARR_API_KEY')])
@@ -382,14 +402,39 @@ public function suprimento(Request $request)
                 $rang++;
             }
 
-            // 3. VALIDA
+            // 4. VALIDA
             Http::withHeaders(['DOLAPIKEY' => env('DOLIBARR_API_KEY')])
                 ->post(env('DOLIBARR_BASE_URL'). '/api/index.php/invoices/'. $invoiceId. '/validate', ['notrigger' => 0]);
 
-            // 4. ATUALIZA CAIXA
+            // 5. ATUALIZA ESTOQUE E CAIXA
             $totalFinal = $totalBruto - ($descontoTipo == 'valor' ? $desconto : ($totalBruto * $desconto / 100));
-            $caixa->increment('total_vendas', $totalFinal);
-            $caixa->increment('total_'. $formaPagamento, $totalFinal);
+
+            DB::transaction(function () use ($carrinho, $caixa, $produtosLocal, $formaPagamento, $totalFinal) {
+                foreach ($carrinho as $item) {
+                    $produtoLocal = $produtosLocal[$item['id']];
+
+                    if ($produtoLocal->stock_quantity !== null) {
+                        $updated = Produto::where('id', $produtoLocal->id)
+                            ->where('stock_quantity', '>=', $item['qtd'])
+                            ->decrement('stock_quantity', $item['qtd']);
+
+                        if ($updated === 0) {
+                            throw new \Exception("Estoque insuficiente para {$produtoLocal->ref_loja}");
+                        }
+                    }
+                }
+
+                $caixa->increment('total_vendas', $totalFinal);
+                $caixa->increment('total_'. $formaPagamento, $totalFinal);
+            });
+
+            // Invalidate dashboard cache for this tenant for the current hour so metrics refresh
+            try {
+                $cacheKey = sprintf('dashboard_metrics:tenant:%s:%s', $caixa->tenant_id, now()->format('Y-m-d-H'));
+                Cache::forget($cacheKey);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to clear dashboard cache', ['tenant_id' => $caixa->tenant_id, 'error' => $e->getMessage()]);
+            }
 
             return response()->json([
                 'success' => true,

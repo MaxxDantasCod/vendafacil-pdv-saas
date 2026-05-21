@@ -46,6 +46,13 @@
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                         </div>
 
+                        <div class="mb-4">
+                            <label for="stock_quantity" class="block text-sm font-medium text-gray-700">Estoque inicial</label>
+                            <input type="number" step="1" min="0" name="stock_quantity" id="stock_quantity" value="{{ old('stock_quantity') }}" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <p class="text-xs text-gray-500 mt-1">Defina a quantidade disponível no estoque local. Deixe em branco para não usar controle de estoque.</p>
+                        </div>
+
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('produtos.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancelar</a>
                             <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">

@@ -25,15 +25,25 @@
             <div class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl shadow-black/20 ring-1 ring-white/5 transition hover:border-zinc-700">
                 <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-brand/10 blur-2xl"></div>
                 <p class="text-sm font-medium text-zinc-400">{{ __('Vendas hoje') }}</p>
-                <p class="mt-4 text-4xl font-semibold tabular-nums tracking-tight text-white">{{ number_format($salesToday ?? 0, 0, ',', '.') }}</p>
-                <p class="mt-2 text-xs text-zinc-500">{{ __('Faturas com data de hoje (Dolibarr)') }}</p>
+                <p class="mt-4 text-4xl font-semibold tabular-nums tracking-tight text-white">{{ $money($salesTodayAmountCents ?? 0) }}</p>
+                <p class="mt-2 text-xs text-zinc-500">{{ ($salesTodayCount ?? 0) . ' ' . __('vendas hoje') }} · {{ __('fonte') }}: {{ __('Dolibarr / Local') }}</p>
             </div>
 
             <div class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl shadow-black/20 ring-1 ring-white/5 transition hover:border-zinc-700">
                 <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl"></div>
                 <p class="text-sm font-medium text-zinc-400">{{ __('Faturamento no mês') }}</p>
-                <p class="mt-4 text-4xl font-semibold tabular-nums tracking-tight text-white">{{ $money($revenueMonthCents ?? 0) }}</p>
-                <p class="mt-2 text-xs text-zinc-500">{{ __('Soma das faturas no mês corrente') }}</p>
+                <p class="mt-4 text-4xl font-semibold tabular-nums tracking-tight text-white">{{ $money($salesMonthAmountCents ?? 0) }}</p>
+                <p class="mt-2 text-xs text-zinc-500">{{ ($salesMonthCount ?? 0) . ' ' . __('faturas no mês') }}</p>
+            </div>
+
+            <div class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl shadow-black/20 ring-1 ring-white/5 transition hover:border-zinc-700">
+                <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-500/10 blur-2xl"></div>
+                <p class="text-sm font-medium text-zinc-400">{{ __('Estoque disponível') }}</p>
+                <p class="mt-4 text-4xl font-semibold tabular-nums tracking-tight text-white">{{ number_format($inventoryCount ?? 0, 0, ',', '.') }}</p>
+                <p class="mt-2 text-xs text-zinc-500">{{ __('Unidades no estoque local') }}</p>
+                @if(!empty($lowStockCount))
+                    <p class="mt-2 text-xs text-amber-400">{{ $lowStockCount }} {{ __('produtos com estoque baixo') }}</p>
+                @endif
             </div>
 
             <div class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl shadow-black/20 ring-1 ring-white/5 transition hover:border-zinc-700 sm:col-span-2 xl:col-span-1">
@@ -57,6 +67,12 @@
                 class="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-zinc-600 hover:bg-zinc-800"
             >
                 {{ __('Ver produtos') }}
+            </a>
+            <a
+                href="{{ route('estoque.index') }}"
+                class="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-5 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-zinc-600 hover:bg-zinc-800"
+            >
+                {{ __('Gerenciar estoque') }}
             </a>
         </div>
     </div>

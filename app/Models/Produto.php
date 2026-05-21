@@ -14,6 +14,11 @@ class Produto extends Model
         'id_dolibarr',
         'tenant_id',
         'ref_loja',
+        'stock_quantity',
+    ];
+
+    protected $casts = [
+        'stock_quantity' => 'integer',
     ];
 
     public function tenant(): BelongsTo
