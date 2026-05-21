@@ -4,6 +4,7 @@
 //      ['route' => 'pdv.show', 'label' => __('PDV'), 'icon' => 'pos'],
 //      ['route' => 'pdv.index', 'label' => __('PDV'), 'icon' => 'pos'],
         ['route' => 'caixa.index', 'label' => __('PDV'), 'icon' => 'pos'],
+        ['route' => 'caixa.relatorios', 'label' => __('Relatórios PDV'), 'icon' => 'chart'],
         ['route' => 'produtos.index', 'label' => __('Produtos'), 'icon' => 'box'],
         ['route' => 'estoque.index', 'label' => __('Estoque'), 'icon' => 'archive'],
         ['route' => 'clientes.index', 'label' => __('Clientes'), 'icon' => 'users'],

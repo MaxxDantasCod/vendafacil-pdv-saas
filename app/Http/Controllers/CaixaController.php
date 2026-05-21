@@ -121,7 +121,77 @@ public function relatorioDia()
         Log::error('Erro relatorioDia: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
         return response()->json(['error' => $e->getMessage()], 500);
     }
-}
+
+    }
+
+    // Buscar caixas por intervalo de datas (consulta por tenant)
+    public function buscarCaixas(Request $request)
+    {
+        $request->validate([
+            'start' => 'nullable|date',
+            'end' => 'nullable|date',
+        ]);
+
+        $user = auth()->user();
+        $query = Caixa::query()->where('tenant_id', $user->tenant_id);
+
+        if ($request->filled('start')) {
+            $query->whereDate('aberto_em', '>=', $request->start);
+        }
+
+        if ($request->filled('end')) {
+            $query->whereDate('aberto_em', '<=', $request->end);
+        }
+
+        if (!$request->filled('start') && !$request->filled('end')) {
+            $query->whereDate('aberto_em', today());
+        }
+
+        $caixas = $query
+            ->with('user:id,name')
+            ->withCount('invoices')
+            ->withSum(['invoices as total_dinheiro' => function ($q) {
+                $q->where('forma_pagamento', 'dinheiro');
+            }], 'total')
+            ->withSum(['invoices as total_pix' => function ($q) {
+                $q->where('forma_pagamento', 'pix');
+            }], 'total')
+            ->withSum(['invoices as total_debito' => function ($q) {
+                $q->where('forma_pagamento', 'debito');
+            }], 'total')
+            ->withSum(['invoices as total_credito' => function ($q) {
+                $q->where('forma_pagamento', 'credito');
+            }], 'total')
+            ->withSum(['movimentos as total_sangria' => function ($q) {
+                $q->where('tipo', 'sangria');
+            }], 'valor')
+            ->withSum(['movimentos as total_suprimento' => function ($q) {
+                $q->where('tipo', 'suprimento');
+            }], 'valor')
+            ->orderBy('aberto_em', 'desc')
+            ->get();
+
+        return response()->json($caixas);
+    }
+    // Listar vendas (invoices + items) de um caixa específico
+    public function vendasCaixa(Caixa $caixa)
+    {
+        $user = auth()->user();
+
+        if ($caixa->tenant_id !== $user->tenant_id) {
+            return response()->json(['error' => 'Acesso negado'], 403);
+        }
+
+        $invoices = $caixa->invoices()->with('items')->orderBy('created_at', 'desc')->get();
+
+        return response()->json($invoices);
+    }
+
+    // Página de relatórios (UI)
+    public function relatoriosPage()
+    {
+        return view('caixa.relatorios');
+    }
 
     // BUSCA PRODUTO - Usa vínculo local igual ProdutoController
 public function buscarProduto(Request $request)
@@ -409,7 +479,7 @@ public function suprimento(Request $request)
             // 5. ATUALIZA ESTOQUE E CAIXA
             $totalFinal = $totalBruto - ($descontoTipo == 'valor' ? $desconto : ($totalBruto * $desconto / 100));
 
-            DB::transaction(function () use ($carrinho, $caixa, $produtosLocal, $formaPagamento, $totalFinal) {
+            DB::transaction(function () use ($carrinho, $caixa, $produtosLocal, $formaPagamento, $totalFinal, $user, $invoiceId) {
                 foreach ($carrinho as $item) {
                     $produtoLocal = $produtosLocal[$item['id']];
 
@@ -422,6 +492,31 @@ public function suprimento(Request $request)
                             throw new \Exception("Estoque insuficiente para {$produtoLocal->ref_loja}");
                         }
                     }
+                }
+
+                // Persist local invoice and items for consulta
+                $invoice = Invoice::create([
+                    'invoice_id_dolibarr' => $invoiceId,
+                    'caixa_id' => $caixa->id,
+                    'tenant_id' => $caixa->tenant_id,
+                    'user_id' => $user->id,
+                    'total' => $totalFinal,
+                    'forma_pagamento' => $formaPagamento,
+                    'invoice_date' => now(),
+                ]);
+
+                foreach ($carrinho as $item) {
+                    $prodLocal = $produtosLocal[$item['id']];
+                    \App\Models\InvoiceItem::create([
+                        'invoice_id' => $invoice->id,
+                        'product_id_dolibarr' => $item['id'],
+                        'nome' => $item['nome'],
+                        'ref_loja' => $prodLocal ? $prodLocal->ref_loja : null,
+                        'qtd' => (int)$item['qtd'],
+                        'preco' => (float)$item['preco'],
+                        'total' => (float)($item['preco'] * $item['qtd']),
+                        'tenant_id' => $caixa->tenant_id,
+                    ]);
                 }
 
                 $caixa->increment('total_vendas', $totalFinal);

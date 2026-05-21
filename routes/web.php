@@ -62,6 +62,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::post('/caixa/abrir', [App\Http\Controllers\CaixaController::class, 'abrir'])->name('caixa.abrir');
     Route::post('/caixa/fechar', [App\Http\Controllers\CaixaController::class, 'fechar'])->name('caixa.fechar');
     Route::get('/caixa/relatorio-dia', [App\Http\Controllers\CaixaController::class, 'relatorioDia'])->name('caixa.relatorio');
+        Route::get('/caixa/relatorios', [App\Http\Controllers\CaixaController::class, 'relatoriosPage'])->name('caixa.relatorios');
+    Route::get('/caixa/buscar-caixas', [App\Http\Controllers\CaixaController::class, 'buscarCaixas'])->name('caixa.buscar-caixas');
+    Route::get('/caixa/{caixa}/vendas', [App\Http\Controllers\CaixaController::class, 'vendasCaixa'])->name('caixa.vendas');
     
     // APIs do PDV reaproveitadas
     Route::get('/caixa/buscar-produto', [App\Http\Controllers\CaixaController::class, 'buscarProduto'])->name('caixa.buscar-produto');

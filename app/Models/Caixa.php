@@ -49,4 +49,9 @@ class Caixa extends Model
     public function movimentos() {
         return $this->hasMany(CaixaMovimento::class)->orderBy('created_at', 'desc');
     }
+
+    public function invoices()
+    {
+        return $this->hasMany(\App\Models\Invoice::class)->orderBy('created_at', 'desc');
+    }
 }
