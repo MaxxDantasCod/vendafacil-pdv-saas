@@ -418,9 +418,30 @@ public function suprimento(Request $request)
     public function finalizarVenda(Request $request)
     {
         try {
+            // BLOQUEIO PLANO FREE
+$user = auth()->user();
+$plan = $user->tenant->plan ?? 'free';
+if (in_array($plan, ['basico','basic'])) $plan = 'free';
+
+if ($plan === 'free') {
+    $usage = \App\Models\SalesUsageMonthly::firstOrCreate(
+        ['user_id' => $user->id, 'year_month' => now()->format('Y-m')],
+        ['sales_count' => 0]
+    );
+    
+    if ($usage->sales_count >= 50) {
+        return response()->json([
+            'error' => 'Limite do plano Free atingido (50 vendas/mês). Faça upgrade para continuar.'
+        ], 403);
+    }
+}
             $user = auth()->user();
             $caixa = Caixa::where('user_id', $user->id)->where('status', 'aberto')->first();
             
+            if ($plan === 'free') {
+            $usage->increment('sales_count');
+          }
+
             if (!$caixa) {
                 return response()->json(['error' => 'Abra o caixa antes de vender'], 400);
             }

@@ -174,10 +174,19 @@
                     <p id="total-venda" class="text-5xl lg:text-6xl font-extrabold text-green-400">R$ 0,00</p>
                 </div>
 
-                <button id="btn-finalizar" onclick="finalizarVenda()" disabled
+             <!--   <button id="btn-finalizar" onclick="finalizarVenda()" disabled
                         class="w-full rounded-lg bg-green-600 px-4 py-4 text-2xl font-bold disabled:bg-gray-600 disabled:cursor-not-allowed active:bg-green-800">
                     F12 - FINALIZAR
-                </button>
+                </button>n-->
+                <button type="button" id="btn-finalizar"
+    @if(!empty($planLimit) && $planUsage >= $planLimit) disabled @endif
+    class="... w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed ...">
+    @if(!empty($planLimit) && $planUsage >= $planLimit)
+        LIMITE ATINGIDO
+    @else
+        F12 - FINALIZAR
+    @endif
+</button>
                 <button onclick="limparVenda()"
                         class="w-full rounded-lg bg-red-600 px-4 py-3 text-lg font-bold active:bg-red-800">
                     ESC - CANCELAR
