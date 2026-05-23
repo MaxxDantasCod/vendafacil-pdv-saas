@@ -15,15 +15,32 @@ use Illuminate\Support\Facades\Cache;
 
 class CaixaController extends Controller
 {
-    public function index()
-    {
-        $user = auth()->user();
-        $caixaAberto = Caixa::where('user_id', $user->id)
-            ->where('status', 'aberto')
-            ->first();
-
-        return view('caixa.index', compact('caixaAberto'));
+ public function index()
+{
+    $user = auth()->user();
+    
+    $plan = $user->tenant->plan ?? 'free';
+    if (in_array($plan, ['basico','basic'])) $plan = 'free';
+    
+    $planLimit = $plan === 'free' ? 50 : null;
+    $planUsage = 0;
+    
+    if ($planLimit) {
+        $planUsage = \App\Models\SalesUsageMonthly::where('user_id', $user->id)
+            ->where('year_month', now()->format('Y-m'))
+            ->value('sales_count') ?? 0;
     }
+
+    $caixaAberto = \App\Models\Caixa::where('user_id', $user->id)
+        ->where('status', 'aberto')
+        ->exists();
+
+    return view('caixa.index', [
+        'caixaAberto' => $caixaAberto,
+        'planUsage'   => $planUsage,
+        'planLimit'   => $planLimit,
+    ]);
+}
 
     public function abrir(Request $request)
     {
@@ -162,6 +179,19 @@ public function relatorioDia()
             ->withSum(['invoices as total_credito' => function ($q) {
                 $q->where('forma_pagamento', 'credito');
             }], 'total')
+            // Somas a partir dos movimentos (registrados pelo PDV)
+            ->withSum(['movimentos as total_dinheiro_mov' => function ($q) {
+                $q->where('tipo', 'pagamento')->where('forma_pagamento', 'dinheiro');
+            }], 'valor')
+            ->withSum(['movimentos as total_pix_mov' => function ($q) {
+                $q->where('tipo', 'pagamento')->where('forma_pagamento', 'pix');
+            }], 'valor')
+            ->withSum(['movimentos as total_debito_mov' => function ($q) {
+                $q->where('tipo', 'pagamento')->where('forma_pagamento', 'debito');
+            }], 'valor')
+            ->withSum(['movimentos as total_credito_mov' => function ($q) {
+                $q->where('tipo', 'pagamento')->where('forma_pagamento', 'credito');
+            }], 'valor')
             ->withSum(['movimentos as total_sangria' => function ($q) {
                 $q->where('tipo', 'sangria');
             }], 'valor')

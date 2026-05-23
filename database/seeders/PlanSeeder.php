@@ -30,5 +30,16 @@ class PlanSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        Plan::query()->updateOrCreate(
+            ['slug' => 'enterprise'],
+            [
+                'name' => 'Enterprise',
+                'description' => 'Recursos avançados sob consulta',
+                'price_cents' => 0,
+                'sales_limit_per_month' => null,
+                'is_active' => false, // <- escondido por enquanto
+            ]
+    );
     }
 }

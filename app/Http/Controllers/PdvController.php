@@ -4,13 +4,44 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Models\Caixa;
+use App\Models\Produto;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\CaixaMovimento;
+use App\Models\SalesUsageMonthly;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PdvController extends Controller
 {
-    public function index()
-    {
-        return view('pdv.index');
+public function index()
+{
+    $user = auth()->user();
+    $tenant = $user->tenant;
+    $plan = $tenant?->plan ?? 'free';
+    if (in_array($plan, ['basico','basic'])) $plan = 'free';
+
+    $planUsage = 0;
+    if ($plan === 'free') {
+        $planUsage = SalesUsageMonthly::where('user_id', $user->id)
+            ->where('year_month', now()->format('Y-m'))
+            ->value('sales_count') ?? 0;
     }
+    $planLimit = $plan === 'free' ? 50 : null;
+    $planUsage = 48; // FORÇAR TESTE
+
+    // a view do caixa precisa saber se tem caixa aberto
+    $caixaAberto = Caixa::where('user_id', $user->id)
+        ->where('status', 'aberto')
+        ->exists();
+
+    return view('caixa.index', [
+        'caixaAberto' => $caixaAberto,
+        'planUsage'   => $planUsage,
+        'planLimit'   => $planLimit,
+    ]);
+}
 
     public function buscarProduto(Request $request)
 {
@@ -98,11 +129,35 @@ public function finalizarVenda(Request $request)
         $clienteId = $request->input('cliente_id');
         $desconto = $request->input('desconto', 0);
         $descontoTipo = $request->input('desconto_tipo', 'valor');
+        // aceita array de pagamentos: [{forma:'dinheiro', valor: 10}, ...]
+        $pagamentos = $request->input('pagamentos');
         $formaPagamento = $request->input('forma_pagamento', 'dinheiro');
 
         if (empty($carrinho)) {
             return response()->json(['error' => 'Carrinho vazio'], 400);
         }
+
+        // === CONTROLE PLANO FREE - NÃO QUEBRA SE DER ERRO ===
+try {
+    $user = auth()->user();
+    $plan = $user->tenant->plan ?? 'free';
+    
+    if ($plan === 'free') {
+        $usage = SalesUsageMonthly::firstOrCreate(
+            ['user_id' => $user->id, 'year_month' => now()->format('Y-m')],
+            ['sales_count' => 0]
+        );
+        
+        if ($usage->sales_count >= 50) {
+            return response()->json([
+                'error' => 'Limite do plano Free atingido (50 vendas/mês). Faça upgrade para Pro.'
+            ], 403);
+        }
+    }
+} catch (\Exception $e) {
+    // Se der qualquer erro aqui, deixa vender - não quebra o PDV
+    \Log::warning('Erro verificação plano: '.$e->getMessage());
+}
 
         if (empty($clienteId)) {
             $urlCliente = env('DOLIBARR_BASE_URL'). '/api/index.php/thirdparties';
@@ -192,6 +247,101 @@ public function finalizarVenda(Request $request)
         if ($responseValida->successful()) {
             $statusFatura = 'Validada';
         }
+
+        // Persistência local + movimentação de caixa (se houver caixa aberto)
+        try {
+            $user = auth()->user();
+            $caixa = Caixa::where('user_id', $user->id)->where('status', 'aberto')->first();
+
+            DB::transaction(function () use ($carrinho, $clienteId, $descontoPercentual, $invoiceId, $user, $caixa, $pagamentos, $formaPagamento) {
+                // Se tiver caixa aberto, registra invoice local e movimentos
+                $totalBruto = 0;
+                foreach ($carrinho as $item) {
+                    $totalBruto += $item['preco'] * $item['qtd'];
+                }
+                $totalFinal = $descontoPercentual > 0 ? ($totalBruto - ($totalBruto * $descontoPercentual / 100)) : $totalBruto;
+
+                if ($caixa) {
+                    $invoice = Invoice::create([
+                        'invoice_id_dolibarr' => $invoiceId,
+                        'caixa_id' => $caixa->id,
+                        'tenant_id' => $caixa->tenant_id,
+                        'user_id' => $user->id,
+                        'total' => $totalFinal,
+                        'forma_pagamento' => $pagamentos ? 'multiplo' : $formaPagamento,
+                        'invoice_date' => now(),
+                    ]);
+
+                    foreach ($carrinho as $item) {
+                        InvoiceItem::create([
+                            'invoice_id' => $invoice->id,
+                            'product_id_dolibarr' => $item['id'] ?? null,
+                            'nome' => $item['nome'] ?? '',
+                            'ref_loja' => null,
+                            'qtd' => (int)$item['qtd'],
+                            'preco' => (float)$item['preco'],
+                            'total' => (float)($item['preco'] * $item['qtd']),
+                            'tenant_id' => $caixa->tenant_id,
+                        ]);
+                    }
+
+                    // registrar pagamentos como movimentos e ajustar totais do caixa
+                    if ($pagamentos && is_array($pagamentos) && count($pagamentos) > 0) {
+                        foreach ($pagamentos as $p) {
+                            $forma = $p['forma'] ?? 'dinheiro';
+                            $valor = floatval($p['valor'] ?? 0);
+                            if ($valor <= 0) continue;
+
+                            CaixaMovimento::create([
+                                'caixa_id' => $caixa->id,
+                                'user_id' => $user->id,
+                                'tenant_id' => $caixa->tenant_id,
+                                'tipo' => 'pagamento',
+                                'valor' => $valor,
+                                'forma_pagamento' => $forma,
+                                'invoice_id' => $invoice->id,
+                                'obs' => 'Pagamento PDV'
+                            ]);
+
+                            $caixa->increment('total_vendas', $valor);
+                            $col = 'total_' . $forma;
+                            if (in_array($col, ['total_dinheiro','total_pix','total_debito','total_credito'])) {
+                                $caixa->increment($col, $valor);
+                            }
+                        }
+                    } else {
+                        // fallback: único pagamento
+                        $valor = $totalFinal;
+                        CaixaMovimento::create([
+                            'caixa_id' => $caixa->id,
+                            'user_id' => $user->id,
+                            'tenant_id' => $caixa->tenant_id,
+                            'tipo' => 'pagamento',
+                            'valor' => $valor,
+                            'forma_pagamento' => $formaPagamento,
+                            'invoice_id' => $invoice->id,
+                            'obs' => 'Pagamento PDV'
+                        ]);
+                        $caixa->increment('total_vendas', $valor);
+                        $col = 'total_' . $formaPagamento;
+                        if (in_array($col, ['total_dinheiro','total_pix','total_debito','total_credito'])) {
+                            $caixa->increment($col, $valor);
+                        }
+                    }
+                }
+            });
+        } catch (\Exception $e) {
+            Log::warning('Falha ao persistir venda local: ' . $e->getMessage());
+        }
+
+        // Incrementa contador do Free
+try {
+    if (($plan ?? 'free') === 'free') {
+        $usage->increment('sales_count');
+    }
+} catch (\Exception $e) {
+    \Log::warning('Erro ao incrementar uso: '.$e->getMessage());
+}
 
         return response()->json([
             'success' => true,

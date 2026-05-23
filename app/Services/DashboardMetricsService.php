@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use App\Models\SalesUsageMonthly;
 
 class DashboardMetricsService
 {
@@ -96,9 +97,19 @@ class DashboardMetricsService
             $lowStockCount = 0;
         }
 
-        return [
-            'tenant' => $tenant,
-            'planLabel' => $tenant?->plan,
+        $plan = $tenant?->plan ?? 'free';
+$usage = null;
+if ($plan === 'free') {
+    $usage = SalesUsageMonthly::where('user_id', $user->id)
+        ->where('year_month', now()->format('Y-m'))
+        ->first();
+}
+
+return [
+    'tenant' => $tenant,
+    'planLabel' => ucfirst($plan),
+    'planUsage' => $usage?->sales_count ?? 0,
+    'planLimit' => $plan === 'free' ? 50 : null,
             'salesTodayCount' => $metrics['sales_today_count'] ?? 0,
             'salesTodayAmountCents' => $metrics['sales_today_amount_cents'] ?? 0,
             'salesMonthCount' => $metrics['sales_month_count'] ?? 0,

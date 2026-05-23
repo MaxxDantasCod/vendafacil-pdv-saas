@@ -183,4 +183,25 @@ class ProdutoController extends Controller
 
         return redirect()->route('produtos.index')->with('success', 'Produto criado com sucesso!');
     }
+
+    public function destroy($id)
+    {
+        $tenantId = auth()->user()->tenant_id;
+
+        $vinculo = Produto::where('id_dolibarr', $id)
+            ->where('tenant_id', $tenantId)
+            ->first();
+
+        if (!$vinculo) {
+            return redirect()->route('produtos.index')->with('error', 'Produto não encontrado ou não pertence à sua loja.');
+        }
+
+        try {
+            $vinculo->delete();
+            return redirect()->route('produtos.index')->with('success', 'Vínculo do produto removido com sucesso.');
+        } catch (\Exception $e) {
+            Log::error('Erro ao deletar produto vinculado', ['id_dolibarr' => $id, 'tenant' => $tenantId, 'error' => $e->getMessage()]);
+            return redirect()->route('produtos.index')->with('error', 'Erro ao deletar produto: ' . $e->getMessage());
+        }
+    }
 }

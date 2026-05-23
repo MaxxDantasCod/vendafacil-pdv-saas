@@ -2,11 +2,16 @@
     <x-slot name="header">
         <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <h1 class="text-xl font-semibold tracking-tight text-white">{{ __('Dashboard') }}</h1>
+            <!-- DEBUG -->
+{{-- {{ dd($planLabel, $planUsage, $planLimit) }} --}}
             @isset($planLabel)
-                <span class="inline-flex w-fit items-center rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand-muted">
-                    {{ __('Plano') }}: {{ $planLabel }}
-                </span>
-            @endisset
+    <span class="inline-flex w-fit items-center rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand-muted">
+        {{ __('Plano') }}: {{ $planLabel }}
+        @if(!empty($planLimit))
+            - {{ $planUsage }}/{{ $planLimit }} vendas
+        @endif
+    </span>
+@endisset
         </div>
     </x-slot>
 
@@ -15,11 +20,27 @@
     @endphp
 
     <div class="mx-auto max-w-7xl space-y-8">
-        @if (empty($tenant))
-            <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
-                {{ __('Nenhum tenant encontrado para o seu e-mail. Cadastre um registro na tabela tenants com o mesmo e-mail para métricas e API.') }}
+    @if (empty($tenant))
+        <div class="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
+            {{ __('Nenhum tenant encontrado para o seu e-mail. Cadastre um registro na tabela tenants com o mesmo e-mail para métricas e API.') }}
+        </div>
+    @endif
+
+    @if(!empty($planLimit))
+        @php $remaining = $planLimit - ($planUsage ?? 0); @endphp
+        
+        @if($planUsage >= $planLimit)
+            <div class="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex items-center justify-between">
+                <span>🚫 {{ __('Limite do plano Free atingido') }} ({{ $planUsage }}/{{ $planLimit }}). {{ __('Faça upgrade para continuar vendendo.') }}</span>
+                <a href="#" class="ml-4 inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white/20">{{ __('Fazer Upgrade') }}</a>
+            </div>
+        @elseif($planUsage >= 45)
+            <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 flex items-center justify-between">
+                <span>⚠️ {{ __('Atenção') }}: {{ __('faltam apenas') }} {{ $remaining }} {{ __('vendas no plano Free') }} ({{ $planUsage }}/{{ $planLimit }}).</span>
+                <a href="#" class="ml-4 inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white/20">{{ __('Ver planos') }}</a>
             </div>
         @endif
+    @endif
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <div class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl shadow-black/20 ring-1 ring-white/5 transition hover:border-zinc-700">

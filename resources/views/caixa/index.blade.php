@@ -39,7 +39,7 @@
         </div>
     </div>
     @endif
-
+    
 <!-- Header Fixo -->
 <div class="bg-gray-800 border-b border-gray-700 px-4 py-3">
     <div class="flex justify-between items-center">
@@ -58,9 +58,9 @@
                 F7 - SUPRIMENTO
             </button>
             <button type="button" @click="menuOpcoesF8 = true; opcaoF8 = 0"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-sm">
-    F8 - OPÇÕES
-</button>
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                F8 - OPÇÕES
+            </button>
             <button type="button" id="btnFechar"
                     class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
                 F10 - FECHAR
@@ -68,6 +68,19 @@
         </div>
     </div>
 </div>
+
+@if(!empty($planLimit))
+    @php $remaining = $planLimit - $planUsage; @endphp
+    @if($planUsage >= $planLimit)
+        <div class="bg-red-900 border-b-2 border-red-500 px-4 py-2 text-center text-sm font-bold text-red-100">
+            🚫 LIMITE ATINGIDO ({{ $planUsage }}/{{ $planLimit }}) - Faça upgrade
+        </div>
+    @elseif($planUsage >= 45)
+        <div class="bg-amber-900 border-b-2 border-amber-500 px-4 py-2 text-center text-sm font-bold text-amber-100">
+            ⚠️ Faltam {{ $remaining }} vendas ({{ $planUsage }}/{{ $planLimit }})
+        </div>
+    @endif
+@endif
 
     <!-- Conteúdo Principal -->
     <div class="lg:grid lg:grid-cols-3 lg:gap-4 lg:p-4 p-2">
