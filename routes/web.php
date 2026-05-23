@@ -66,12 +66,12 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/caixa/buscar-caixas', [App\Http\Controllers\CaixaController::class, 'buscarCaixas'])->name('caixa.buscar-caixas');
     Route::get('/caixa/{caixa}/vendas', [App\Http\Controllers\CaixaController::class, 'vendasCaixa'])->name('caixa.vendas');
     
-    // APIs do PDV reaproveitadas
+    // APIs do Caixa (PDV)
     Route::get('/caixa/buscar-produto', [App\Http\Controllers\CaixaController::class, 'buscarProduto'])->name('caixa.buscar-produto');
     Route::get('/caixa/buscar-cliente', [App\Http\Controllers\CaixaController::class, 'buscarCliente'])->name('caixa.buscar-cliente');
     Route::post('/caixa/finalizar-venda', [App\Http\Controllers\CaixaController::class, 'finalizarVenda'])->name('caixa.finalizar');
 
-    // NOVO: Sangria e Suprimento
+    // Sangria e Suprimento
     Route::post('/caixa/sangria', [App\Http\Controllers\CaixaController::class, 'sangria'])->name('caixa.sangria');
     Route::post('/caixa/suprimento', [App\Http\Controllers\CaixaController::class, 'suprimento'])->name('caixa.suprimento');
 
@@ -79,5 +79,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/estoque', [EstoqueController::class, 'index'])->name('estoque.index');
     Route::get('/estoque/{produto}/editar', [EstoqueController::class, 'edit'])->name('estoque.edit');
     Route::put('/estoque/{produto}', [EstoqueController::class, 'update'])->name('estoque.update');
-});
+
+    // Planos e Financeiro
+    Route::get('/planos', [App\Http\Controllers\PlanController::class, 'index'])->name('planos.index');
+ });
 require __DIR__.'/auth.php';

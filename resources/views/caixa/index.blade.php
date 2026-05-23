@@ -72,9 +72,10 @@
 @if(!empty($planLimit))
     @php $remaining = $planLimit - $planUsage; @endphp
     @if($planUsage >= $planLimit)
-        <div class="bg-red-900 border-b-2 border-red-500 px-4 py-2 text-center text-sm font-bold text-red-100">
-            🚫 LIMITE ATINGIDO ({{ $planUsage }}/{{ $planLimit }}) - Faça upgrade
-        </div>
+        <div class="bg-red-900...">
+    🚫 LIMITE ATINGIDO ({{ $planUsage }}/{{ $planLimit }}) — 
+    <a href="{{ route('planos.index') }}" class="underline text-white">Faça upgrade</a>
+</div>
     @elseif($planUsage >= 45)
         <div class="bg-amber-900 border-b-2 border-amber-500 px-4 py-2 text-center text-sm font-bold text-amber-100">
             ⚠️ Faltam {{ $remaining }} vendas ({{ $planUsage }}/{{ $planLimit }})
