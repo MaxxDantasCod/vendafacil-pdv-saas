@@ -32,12 +32,12 @@
         @if($planUsage >= $planLimit)
             <div class="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex items-center justify-between">
                 <span>🚫 {{ __('Limite do plano Free atingido') }} ({{ $planUsage }}/{{ $planLimit }}). {{ __('Faça upgrade para continuar vendendo.') }}</span>
-                <a href="#" class="ml-4 inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white/20">{{ __('Fazer Upgrade') }}</a>
+                <a href="{{ route('planos.index') }}" class="ml-4 inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white/20">{{ __('Fazer Upgrade') }}</a>
             </div>
         @elseif($planUsage >= 45)
             <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 flex items-center justify-between">
                 <span>⚠️ {{ __('Atenção') }}: {{ __('faltam apenas') }} {{ $remaining }} {{ __('vendas no plano Free') }} ({{ $planUsage }}/{{ $planLimit }}).</span>
-                <a href="#" class="ml-4 inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white/20">{{ __('Ver planos') }}</a>
+                <a href="{{ route('planos.index') }}" class="ml-4 inline-flex items-center rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium hover:bg-white/20">{{ __('Ver planos') }}</a>
             </div>
         @endif
     @endif
@@ -47,7 +47,7 @@
                 <div class="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-brand/10 blur-2xl"></div>
                 <p class="text-sm font-medium text-zinc-400">{{ __('Vendas hoje') }}</p>
                 <p class="mt-4 text-4xl font-semibold tabular-nums tracking-tight text-white">{{ $money($salesTodayAmountCents ?? 0) }}</p>
-                <p class="mt-2 text-xs text-zinc-500">{{ ($salesTodayCount ?? 0) . ' ' . __('vendas hoje') }} · {{ __('fonte') }}: {{ __('Dolibarr / Local') }}</p>
+                <p class="mt-2 text-xs text-zinc-500">{{ ($salesTodayCount ?? 0) . ' ' . __('vendas hoje') }} · {{ __('fonte') }}: {{ __('Local') }}</p>
             </div>
 
             <div class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 shadow-xl shadow-black/20 ring-1 ring-white/5 transition hover:border-zinc-700">

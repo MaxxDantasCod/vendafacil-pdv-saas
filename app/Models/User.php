@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -13,50 +11,44 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-    'name',
-    'email', 
-    'password',
-    'tenant_id', // ← importante
-];
+        'name',
+        'email',
+        'password',
+        'tenant_id',
+        'role',
+        'cpf_cnpj',
+    ];
 
-    public function tenant()
-    {
-    return $this->belongsTo(Tenant::class);
-    }
- /*   /**
-     * Tenant associado pelo mesmo e-mail (cadastro em `tenants`).
-     
-    public function tenant(): HasOne
-    {
-        return $this->hasOne(Tenant::class, 'email', 'email');
-    } */
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
+        'cpf_cnpj',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'cpf_cnpj' => 'encrypted',
     ];
-    
-//    protected $fillable = [
-//        'name', 'email', 'password', 'tenant_id', 'role',
-//    ];
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function getCpfMascaradoAttribute()
+    {
+        if (!$this->cpf_cnpj) return null;
+
+        $cpf = preg_replace('/\D/', '', $this->cpf_cnpj);
+        return strlen($cpf) === 11
+           ? '***.'.substr($cpf,3,3).'.'.substr($cpf,6,3).'-**'
+            : '**.***.'.substr($cpf,5,3).'/****-**';
+    }
+
+    public function getIsSuperadminAttribute(): bool
+    {
+        return $this->role === 'superadmin';
+    }
 }

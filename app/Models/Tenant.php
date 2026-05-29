@@ -23,4 +23,31 @@ class Tenant extends Model
     protected $casts = [
         'api_key' => 'encrypted',
     ];
+
+    // Adiciona no final da classe
+public function getStatusPtAttribute()
+{
+    return match($this->plan_status) {
+        'active' => 'Ativo',
+        'pending' => 'Aguardando pagamento',
+        'overdue' => 'Pagamento atrasado',
+        'cancelled' => 'Cancelado',
+        default => 'Inativo'
+    };
+}
+
+public function getPlanoPtAttribute()
+{
+    return match($this->plan) {
+        'free' => 'Gratuito',
+        'pro' => 'Pro',
+        'enterprise' => 'Enterprise',
+        default => ucfirst($this->plan)
+    };
+}
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

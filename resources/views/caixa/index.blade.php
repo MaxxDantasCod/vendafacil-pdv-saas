@@ -49,22 +49,22 @@
             </h4>
         </div>
         <div class="flex gap-2">
-            <button type="button" onclick="abrirSangria()"
+           <!-- <button type="button" onclick="abrirSangria()"
                     class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
                 F6 - SANGRIA
             </button>
             <button type="button" onclick="abrirSuprimento()"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
                 F7 - SUPRIMENTO
-            </button>
+            </button> -->
             <button type="button" @click="menuOpcoesF8 = true; opcaoF8 = 0"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-lg text-sm">
                 F8 - OPÇÕES
             </button>
-            <button type="button" id="btnFechar"
-                    class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
-                F10 - FECHAR
-            </button>
+            <button type="button" id="btnFechar" onclick="fecharCaixa()"
+        class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg text-sm">
+    F10 - FECHAR
+</button>
         </div>
     </div>
 </div>
@@ -179,9 +179,9 @@
                         class="w-full rounded-lg bg-green-600 px-4 py-4 text-2xl font-bold disabled:bg-gray-600 disabled:cursor-not-allowed active:bg-green-800">
                     F12 - FINALIZAR
                 </button>n-->
-                <button type="button" id="btn-finalizar"
+                <button type="button" id="btn-finalizar" onclick="finalizarVenda()"
     @if(!empty($planLimit) && $planUsage >= $planLimit) disabled @endif
-    class="... w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed ...">
+    class="w-full rounded-lg bg-green-600 hover:bg-green-700 px-4 py-4 text-2xl font-bold disabled:bg-gray-600 disabled:cursor-not-allowed active:bg-green-800">
     @if(!empty($planLimit) && $planUsage >= $planLimit)
         LIMITE ATINGIDO
     @else
@@ -312,9 +312,9 @@
 <div x-show="menuOpcoesF8" 
      x-transition
      @keydown.window.escape="menuOpcoesF8 = false"
-     @keydown.window.arrow-down.prevent="opcaoF8 = Math.min(opcaoF8 + 1, 2)"
-     @keydown.window.arrow-up.prevent="opcaoF8 = Math.max(opcaoF8 - 1, 0)"
-     @keydown.window.enter.prevent="executarF8()"
+     @keydown.window.arrow-down.prevent="if(menuOpcoesF8) opcaoF8 = Math.min(opcaoF8 + 1, 2)"
+     @keydown.window.arrow-up.prevent="if(menuOpcoesF8) opcaoF8 = Math.max(opcaoF8 - 1, 0)"
+     @keydown.window.enter.prevent="if(menuOpcoesF8) executarF8()"
      class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4" 
      style="display: none;">
     <div @click.away="menuOpcoesF8 = false" class="bg-gray-800 rounded-lg p-6 w-full max-w-sm border-2 border-blue-500">

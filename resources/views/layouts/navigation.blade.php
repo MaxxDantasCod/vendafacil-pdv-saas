@@ -9,6 +9,7 @@
         ['route' => 'estoque.index', 'label' => __('Estoque'), 'icon' => 'archive'],
         ['route' => 'clientes.index', 'label' => __('Clientes'), 'icon' => 'users'],
         ['route' => 'reports.index', 'label' => __('Relatórios'), 'icon' => 'chart'],
+        ['route' => 'planos.assinatura', 'label' => __('Minha Assinatura'), 'icon' => 'user'],
     ];
 @endphp
 

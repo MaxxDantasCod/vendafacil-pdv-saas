@@ -1,140 +1,593 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VendaFácil PDV — O PDV completo que sua loja precisa</title>
+<meta name="description" content="PDV online completo para varejo brasileiro. Venda mais rápido, controle estoque por grade, emita NFC-e e SAT, receba PIX e gerencie o financeiro.">
+<style>
+:root{
+  --bg:#0a0f1c;
+  --bg-elev:#111827;
+  --card:rgba(17,24,39,.7);
+  --border:rgba(255,255,255,.08);
+  --border-2:rgba(255,255,255,.14);
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --muted-2:#6b7280;
+  --emerald:#10b981;
+  --emerald-2:#059669;
+  --emerald-glow:rgba(16,185,129,.25);
+  --blue:#3b82f6;
+  --blue-glow:rgba(59,130,246,.25);
+  --radius:16px;
+  --shadow:0 10px 40px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
 
-        <title>Laravel</title>
+/* Background */
+.bg{
+  position:fixed;inset:0;z-index:-2;overflow:hidden;
+}
+.grid-bg{
+  position:absolute;inset:-1px;
+  background-image:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:radial-gradient(ellipse at 50% 0%, black 30%, transparent 70%);
+}
+.glow{
+  position:absolute;filter:blur(80px);opacity:.7;pointer-events:none;
+}
+.glow-1{width:560px;height:560px;left:-120px;top:-180px;background:radial-gradient(circle at center,rgba(16,185,129,.35),transparent 60%)}
+.glow-2{width:520px;height:520px;right:-140px;top:10%;background:radial-gradient(circle at center,rgba(59,130,246,.3),transparent 60%)}
+.glow-3{width:600px;height:600px;left:20%;bottom:-300px;background:radial-gradient(circle at center,rgba(16,185,129,.18),transparent 60%)}
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
+/* Header */
+.header{
+  position:sticky;top:0;z-index:40;
+  backdrop-filter:saturate(140%) blur(14px);
+  background:rgba(10,15,28,.7);
+  border-bottom:1px solid var(--border);
+}
+.nav{
+  display:flex;align-items:center;gap:28px;height:72px;
+}
+.logo{
+  display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:18px;
+}
+.logo-icon{
+  width:32px;height:32px;border-radius:10px;
+  background:linear-gradient(135deg,var(--emerald),var(--blue));
+  display:grid;place-items:center;
+  box-shadow:0 0 24px var(--emerald-glow), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.nav-links{display:flex;gap:26px;margin-left:8px}
+.nav-links a{color:var(--muted);font-size:14.5px;font-weight:500;transition:.2s}
+.nav-links a:hover{color:var(--text)}
+.nav-actions{display:flex;gap:10px;margin-left:auto;align-items:center}
+.btn{ display:inline-flex;align-items:center;justify-content:center;gap:8px; font-weight:600; font-size:14.5px; padding:10px 16px; border-radius:12px; border:1px solid transparent; transition:.2s; white-space:nowrap; cursor:pointer }
+.btn-ghost{color:#d1d5db;background:transparent;border-color:transparent}
+.btn-ghost:hover{background:rgba(255,255,255,.06);color:#fff}
+.btn-primary{
+  background:var(--emerald); color:#052e24; border-color:rgba(255,255,255,.08);
+  box-shadow:0 6px 20px var(--emerald-glow), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.btn-primary:hover{background:var(--emerald-2); transform:translateY(-1px); box-shadow:0 10px 28px var(--emerald-glow)}
+.btn-secondary{
+  background:rgba(255,255,255,.06); color:#fff; border-color:var(--border);
+  backdrop-filter:blur(8px);
+}
+.btn-secondary:hover{background:rgba(255,255,255,.1); border-color:var(--border-2)}
+.btn-lg{padding:13px 20px;font-size:15.5px;border-radius:14px}
 
-        <!-- Styles -->
-        <style>
-            /* ! tailwindcss v3.2.4 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Figtree, sans-serif;font-feature-settings:normal}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]{display:none}*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }::-webkit-backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: }.relative{position:relative}.mx-auto{margin-left:auto;margin-right:auto}.mx-6{margin-left:1.5rem;margin-right:1.5rem}.ml-4{margin-left:1rem}.mt-16{margin-top:4rem}.mt-6{margin-top:1.5rem}.mt-4{margin-top:1rem}.-mt-px{margin-top:-1px}.mr-1{margin-right:0.25rem}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.h-16{height:4rem}.h-7{height:1.75rem}.h-6{height:1.5rem}.h-5{height:1.25rem}.min-h-screen{min-height:100vh}.w-auto{width:auto}.w-16{width:4rem}.w-7{width:1.75rem}.w-6{width:1.5rem}.w-5{width:1.25rem}.max-w-7xl{max-width:80rem}.shrink-0{flex-shrink:0}.scale-100{--tw-scale-x:1;--tw-scale-y:1;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.items-center{align-items:center}.justify-center{justify-content:center}.gap-6{gap:1.5rem}.gap-4{gap:1rem}.self-center{align-self:center}.rounded-lg{border-radius:0.5rem}.rounded-full{border-radius:9999px}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity))}.bg-dots-darker{background-image:url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z' fill='rgba(0,0,0,0.07)'/%3E%3C/svg%3E")}.from-gray-700\/50{--tw-gradient-from:rgb(55 65 81 / 0.5);--tw-gradient-to:rgb(55 65 81 / 0);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-transparent{--tw-gradient-to:rgb(0 0 0 / 0);--tw-gradient-stops:var(--tw-gradient-from), transparent, var(--tw-gradient-to)}.bg-center{background-position:center}.stroke-red-500{stroke:#ef4444}.stroke-gray-400{stroke:#9ca3af}.p-6{padding:1.5rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.text-center{text-align:center}.text-right{text-align:right}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.font-semibold{font-weight:600}.leading-relaxed{line-height:1.625}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-gray-500\/20{--tw-shadow-color:rgb(107 114 128 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.selection\:bg-red-500 *::selection{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity))}.selection\:text-white *::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.selection\:bg-red-500::selection{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.hover\:text-gray-900:hover{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity))}.hover\:text-gray-700:hover{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity))}.focus\:rounded-sm:focus{border-radius:0.125rem}.focus\:outline:focus{outline-style:solid}.focus\:outline-2:focus{outline-width:2px}.focus\:outline-red-500:focus{outline-color:#ef4444}.group:hover .group-hover\:stroke-gray-600{stroke:#4b5563}@media (prefers-reduced-motion: no-preference){.motion-safe\:hover\:scale-\[1\.01\]:hover{--tw-scale-x:1.01;--tw-scale-y:1.01;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}}@media (prefers-color-scheme: dark){.dark\:bg-gray-900{--tw-bg-opacity:1;background-color:rgb(17 24 39 / var(--tw-bg-opacity))}.dark\:bg-gray-800\/50{background-color:rgb(31 41 55 / 0.5)}.dark\:bg-red-800\/20{background-color:rgb(153 27 27 / 0.2)}.dark\:bg-dots-lighter{background-image:url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.22676 0C1.91374 0 2.45351 0.539773 2.45351 1.22676C2.45351 1.91374 1.91374 2.45351 1.22676 2.45351C0.539773 2.45351 0 1.91374 0 1.22676C0 0.539773 0.539773 0 1.22676 0Z' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E")}.dark\:bg-gradient-to-bl{background-image:linear-gradient(to bottom left, var(--tw-gradient-stops))}.dark\:stroke-gray-600{stroke:#4b5563}.dark\:text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity))}.dark\:text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.dark\:shadow-none{--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.dark\:ring-1{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.dark\:ring-inset{--tw-ring-inset:inset}.dark\:ring-white\/5{--tw-ring-color:rgb(255 255 255 / 0.05)}.dark\:hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity))}.group:hover .dark\:group-hover\:stroke-gray-400{stroke:#9ca3af}}@media (min-width: 640px){.sm\:fixed{position:fixed}.sm\:top-0{top:0px}.sm\:right-0{right:0px}.sm\:ml-0{margin-left:0px}.sm\:flex{display:flex}.sm\:items-center{align-items:center}.sm\:justify-center{justify-content:center}.sm\:justify-between{justify-content:space-between}.sm\:text-left{text-align:left}.sm\:text-right{text-align:right}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:gap-8{gap:2rem}.lg\:p-8{padding:2rem}}
-        </style>
-    </head>
-    <body class="antialiased">
-        <div class="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
-            @if (Route::has('login'))
-                <div class="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
-                    @auth
-                        <a href="{{ url('/dashboard') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Dashboard</a>
-                    @else
-                        <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Log in</a>
+.menu-toggle{display:none;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);place-items:center;cursor:pointer}
+.menu-toggle:hover{background:rgba(255,255,255,.08)}
+.mobile{display:none}
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="ml-4 font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Register</a>
-                        @endif
-                    @endauth
-                </div>
-            @endif
+/* Hero */
+.hero{padding:88px 0 40px;position:relative;text-align:center}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+  background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.25); color:#86efac;
+  font-size:12.5px;font-weight:600; letter-spacing:.01em; margin-bottom:20px;
+}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 10px #10b981}
+h1{
+  font-size:clamp(38px,6vw,66px); line-height:1.02; letter-spacing:-.03em; font-weight:900;
+  margin:0 0 18px;
+  background:linear-gradient(180deg,#fff 0%, #c7d2e0 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{
+  max-width:740px;margin:0 auto 32px;color:var(--muted);font-size:18px;
+}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:56px}
 
-            <div class="max-w-7xl mx-auto p-6 lg:p-8">
-                <div class="flex justify-center">
-                    <svg viewBox="0 0 62 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-16 w-auto bg-gray-100 dark:bg-gray-900">
-                        <path d="M61.8548 14.6253C61.8778 14.7102 61.8895 14.7978 61.8897 14.8858V28.5615C61.8898 28.737 61.8434 28.9095 61.7554 29.0614C61.6675 29.2132 61.5409 29.3392 61.3887 29.4265L49.9104 36.0351V49.1337C49.9104 49.4902 49.7209 49.8192 49.4118 49.9987L25.4519 63.7916C25.3971 63.8227 25.3372 63.8427 25.2774 63.8639C25.255 63.8714 25.2338 63.8851 25.2101 63.8913C25.0426 63.9354 24.8666 63.9354 24.6991 63.8913C24.6716 63.8838 24.6467 63.8689 24.6205 63.8589C24.5657 63.8389 24.5084 63.8215 24.456 63.7916L0.501061 49.9987C0.348882 49.9113 0.222437 49.7853 0.134469 49.6334C0.0465019 49.4816 0.000120578 49.3092 0 49.1337L0 8.10652C0 8.01678 0.0124642 7.92953 0.0348998 7.84477C0.0423783 7.8161 0.0598282 7.78993 0.0697995 7.76126C0.0884958 7.70891 0.105946 7.65531 0.133367 7.6067C0.152063 7.5743 0.179485 7.54812 0.20192 7.51821C0.230588 7.47832 0.256763 7.43719 0.290416 7.40229C0.319084 7.37362 0.356476 7.35243 0.388883 7.32751C0.425029 7.29759 0.457436 7.26518 0.498568 7.2415L12.4779 0.345059C12.6296 0.257786 12.8015 0.211853 12.9765 0.211853C13.1515 0.211853 13.3234 0.257786 13.475 0.345059L25.4531 7.2415H25.4556C25.4955 7.26643 25.5292 7.29759 25.5653 7.32626C25.5977 7.35119 25.6339 7.37362 25.6625 7.40104C25.6974 7.43719 25.7224 7.47832 25.7523 7.51821C25.7735 7.54812 25.8021 7.5743 25.8196 7.6067C25.8483 7.65656 25.8645 7.70891 25.8844 7.76126C25.8944 7.78993 25.9118 7.8161 25.9193 7.84602C25.9423 7.93096 25.954 8.01853 25.9542 8.10652V33.7317L35.9355 27.9844V14.8846C35.9355 14.7973 35.948 14.7088 35.9704 14.6253C35.9792 14.5954 35.9954 14.5692 36.0053 14.5405C36.0253 14.4882 36.0427 14.4346 36.0702 14.386C36.0888 14.3536 36.1163 14.3274 36.1375 14.2975C36.1674 14.2576 36.1923 14.2165 36.2272 14.1816C36.2559 14.1529 36.292 14.1317 36.3244 14.1068C36.3618 14.0769 36.3942 14.0445 36.4341 14.0208L48.4147 7.12434C48.5663 7.03694 48.7383 6.99094 48.9133 6.99094C49.0883 6.99094 49.2602 7.03694 49.4118 7.12434L61.3899 14.0208C61.4323 14.0457 61.4647 14.0769 61.5021 14.1055C61.5333 14.1305 61.5694 14.1529 61.5981 14.1803C61.633 14.2165 61.6579 14.2576 61.6878 14.2975C61.7103 14.3274 61.7377 14.3536 61.7551 14.386C61.7838 14.4346 61.8 14.4882 61.8199 14.5405C61.8312 14.5692 61.8474 14.5954 61.8548 14.6253ZM59.893 27.9844V16.6121L55.7013 19.0252L49.9104 22.3593V33.7317L59.8942 27.9844H59.893ZM47.9149 48.5566V37.1768L42.2187 40.4299L25.953 49.7133V61.2003L47.9149 48.5566ZM1.99677 9.83281V48.5566L23.9562 61.199V49.7145L12.4841 43.2219L12.4804 43.2194L12.4754 43.2169C12.4368 43.1945 12.4044 43.1621 12.3682 43.1347C12.3371 43.1097 12.3009 43.0898 12.2735 43.0624L12.271 43.0586C12.2386 43.0275 12.2162 42.9888 12.1887 42.9539C12.1638 42.9203 12.1339 42.8916 12.114 42.8567L12.1127 42.853C12.0903 42.8156 12.0766 42.7707 12.0604 42.7283C12.0442 42.6909 12.023 42.656 12.013 42.6161C12.0005 42.5688 11.998 42.5177 11.9931 42.4691C11.9881 42.4317 11.9781 42.3943 11.9781 42.3569V15.5801L6.18848 12.2446L1.99677 9.83281ZM12.9777 2.36177L2.99764 8.10652L12.9752 13.8513L22.9541 8.10527L12.9752 2.36177H12.9777ZM18.1678 38.2138L23.9574 34.8809V9.83281L19.7657 12.2459L13.9749 15.5801V40.6281L18.1678 38.2138ZM48.9133 9.14105L38.9344 14.8858L48.9133 20.6305L58.8909 14.8846L48.9133 9.14105ZM47.9149 22.3593L42.124 19.0252L37.9323 16.6121V27.9844L43.7219 31.3174L47.9149 33.7317V22.3593ZM24.9533 47.987L39.59 39.631L46.9065 35.4555L36.9352 29.7145L25.4544 36.3242L14.9907 42.3482L24.9533 47.987Z" fill="#FF2D20"/>
-                    </svg>
-                </div>
+/* Mockup */
+.mockup-wrap{max-width:1040px;margin:0 auto;position:relative}
+.mockup{
+  background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  border:1px solid var(--border-2); border-radius:24px; padding:14px;
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(10px);
+}
+.mockup-top{
+  display:flex;align-items:center;gap:12px;padding:8px 10px 14px;border-bottom:1px solid var(--border);
+}
+.dots{display:flex;gap:6px}
+.dots span{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18)}
+.mockup-title{margin-left:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--muted-2)}
+.mockup-body{
+  display:grid;grid-template-columns:1.45fr .95fr;gap:14px;
+  background:#0b1220;border-radius:16px;margin-top:10px;padding:14px;min-height:380px;
+  border:1px solid rgba(255,255,255,.04)
+}
+.panel{
+  background:var(--bg-elev); border:1px solid var(--border); border-radius:14px; padding:14px;
+}
+.search{
+  display:flex;align-items:center;gap:8px;background:#0a0f1c;border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;color:var(--muted-2);font-size:13px;margin-bottom:12px
+}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.prod{
+  background:#0c1322;border:1px solid var(--border);border-radius:12px;padding:10px;
+  transition:.2s; cursor:default;
+}
+.prod:hover{transform:translateY(-2px);border-color:rgba(16,185,129,.35);box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.prod-img{height:54px;border-radius:8px;background:linear-gradient(135deg,rgba(59,130,246,.35),rgba(16,185,129,.35));margin-bottom:8px}
+.prod-name{font-size:12px;color:#d1d5db;font-weight:600}
+.prod-price{font-size:11px;color:var(--muted)}
+.cart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cart-tag{font-size:11px;color:#86efac;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);padding:4px 8px;border-radius:999px}
+.items{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.item{display:flex;align-items:center;justify-content:space-between;background:#0a0f1c;border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:12.5px}
+.item small{color:var(--muted)}
+.total{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(16,185,129,.18),rgba(16,185,129,.06));border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:12px 14px;margin:12px 0 10px}
+.total strong{font-size:20px;letter-spacing:-.01em}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pay-btn{padding:10px;border-radius:10px;font-weight:700;font-size:13px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#fff;cursor:default}
+.pay-btn.pix{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.35);color:#a7f3d0}
 
-                <div class="mt-16">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                        <a href="https://laravel.com/docs" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                    </svg>
-                                </div>
+/* Sections */
+.section{padding:88px 0}
+.section-head{text-align:center;max-width:760px;margin:0 auto 44px}
+.eyebrow{color:#86efac;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.h2{font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-.02em;margin:0 0 12px;font-weight:800}
+.sub{color:var(--muted);font-size:17px}
 
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Documentation</h2>
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px;
+  backdrop-filter:blur(8px); transition:.25s; position:relative; overflow:hidden;
+}
+.card:hover{transform:translateY(-3px);border-color:var(--border-2);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.card:before{
+  content:"";position:absolute;inset:-1px;background:radial-gradient(400px circle at var(--x,50%) var(--y,50%), rgba(16,185,129,.15), transparent 40%);opacity:0;transition:.3s;pointer-events:none
+}
+.card:hover:before{opacity:1}
+.icon{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px;
+  background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(59,130,246,.2));
+  border:1px solid rgba(255,255,255,.08); color:#a7f3d0;
+}
+.card h3{margin:0 0 6px;font-size:17px;letter-spacing:-.01em}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
 
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laravel has wonderful documentation covering every aspect of the framework. Whether you are a newcomer or have prior experience with Laravel, we recommend reading our documentation from beginning to end.
-                                </p>
-                            </div>
+/* Segments */
+.segments{padding:40px 0 20px}
+.pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:18px}
+.pill{
+  padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:#d1d5db;font-size:14px;font-weight:500;transition:.2s
+}
+.pill:hover{background:rgba(255,255,255,.08);border-color:var(--border-2);transform:translateY(-1px)}
 
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
+/* Pricing */
+.pricing{padding-top:72px}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch;margin-top:34px}
+.price-card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;
+  backdrop-filter:blur(8px);display:flex;flex-direction:column;position:relative
+}
+.price-card.featured{
+  border-color:rgba(16,185,129,.5);box-shadow:0 0 0 1px rgba(16,185,129,.2) inset, 0 20px 50px rgba(16,185,129,.15);
+  transform:translateY(-4px)
+}
+.price-badge{
+  position:absolute;top:14px;right:14px;font-size:11px;font-weight:700;color:#052e24;
+  background:#10b981;padding:5px 9px;border-radius:999px;letter-spacing:.02em
+}
+.price-name{font-weight:700;font-size:16px;margin-bottom:6px}
+.price-value{font-size:38px;font-weight:900;letter-spacing:-.02em;margin:6px 0}
+.price-value small{font-size:14px;color:var(--muted);font-weight:600}
+.price-desc{color:var(--muted);font-size:14px;margin-bottom:18px;min-height:40px}
+.features{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:10px}
+.features li{display:flex;gap:9px;align-items:flex-start;font-size:14px;color:#d1d5db}
+.check{width:18px;height:18px;border-radius:50%;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);display:grid;place-items:center;flex:0 0 18px;margin-top:2px;color:#86efac}
+.price-cta{margin-top:auto}
 
-                        <a href="https://laracasts.com" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                                    </svg>
-                                </div>
+/* Final CTA */
+.final{
+  margin:80px 0 0;position:relative;overflow:hidden;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(600px 200px at 50% -20%, rgba(16,185,129,.25), transparent 70%),
+    linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0));
+}
+.final-inner{text-align:center;padding:72px 24px}
+.final h3{font-size:clamp(28px,4vw,40px);letter-spacing:-.02em;margin:0 0 10px;font-weight:900}
+.final p{color:var(--muted);margin:0 0 24px;font-size:17px}
 
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Laracasts</h2>
+/* Footer */
+footer{padding:56px 0 40px;color:#9aa3b2}
+.foot-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr;gap:28px;margin-bottom:36px}
+.foot-brand .logo{margin-bottom:12px}
+.foot-desc{font-size:14px;color:var(--muted);max-width:320px}
+.foot-title{font-weight:700;color:#e5e7eb;margin-bottom:12px;font-size:14px}
+.foot-links{display:flex;flex-direction:column;gap:9px}
+.foot-links a{color:#9aa3b2;font-size:14px}
+.foot-links a:hover{color:#e5e7eb}
+.foot-bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:18px;border-top:1px solid var(--border);font-size:13px;color:#7d8596}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge-mini{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:12px}
 
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process.
-                                </p>
-                            </div>
+/* Responsive */
+@media (max-width:1024px){
+  .mockup-body{grid-template-columns:1fr}
+  .products{grid-template-columns:repeat(4,1fr)}
+}
+@media (max-width:900px){
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+  .pricing-grid{grid-template-columns:1fr;max-width:520px;margin-left:auto;margin-right:auto}
+  .price-card.featured{transform:none}
+  .foot-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:768px){
+  .nav-links{display:none}
+  .nav-actions.desktop{display:none}
+  .menu-toggle{display:grid;margin-left:auto}
+  .mobile{display:block;position:absolute;inset:72px 0 auto 0;background:rgba(10,15,28,.98);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 24px;transform-origin:top;transform:scaleY(0);opacity:0;pointer-events:none;transition:.2s}
+  .mobile.open{transform:scaleY(1);opacity:1;pointer-events:auto}
+  .mobile a{display:block;padding:12px 0;color:#d1d5db;border-bottom:1px solid rgba(255,255,255,.06)}
+  .mobile .btns{display:flex;gap:10px;margin-top:12px}
+  .hero{padding-top:64px}
+  .products{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .container{padding:0 18px}
+  .grid-3{grid-template-columns:1fr}
+  .hero p{font-size:16px}
+  .mockup{padding:10px;border-radius:18px}
+  .mockup-body{padding:10px}
+  .foot-grid{grid-template-columns:1fr}
+  .foot-bottom{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="grid-bg"></div>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+</div>
 
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
+<header class="header">
+  <div class="container nav">
+    <a class="logo" href="/">
+      <span class="logo-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#052e24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9h18M7 3v6M17 3v6M5 21h14a2 2 0 0 0 2-2V9H3v10a2 2 0 0 0 2 2Z"/>
+        </svg>
+      </span>
+      VendaFácil
+    </a>
+    <nav class="nav-links">
+      <a href="#recursos">Recursos</a>
+      <a href="#planos">Planos</a>
+      <a href="#segmentos">Segmentos</a>
+    </nav>
+    <div class="nav-actions desktop">
+      <a href="{{ route('login') }}" class="btn btn-ghost">Entrar</a>
+      <a href="{{ route('register') }}" class="btn btn-primary">Criar conta grátis</a>
+    </div>
+    <button class="menu-toggle" id="menuBtn" aria-label="Abrir menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div class="mobile" id="mobileNav">
+    <a href="#recursos">Recursos</a>
+    <a href="#planos">Planos</a>
+    <a href="#segmentos">Segmentos</a>
+    <div class="btns">
+      <a href="{{ route('login') }}" class="btn btn-secondary" style="flex:1">Entrar</a>
+      <a href="{{ route('register') }}" class="btn btn-primary" style="flex:1">Criar conta</a>
+    </div>
+  </div>
+</header>
 
-                        <a href="https://laravel-news.com" class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
-                                    </svg>
-                                </div>
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge"><span class="badge-dot"></span> Novo: Emissão NFC-e automática</div>
+      <h1>O PDV completo que sua loja precisa</h1>
+      <p>Venda mais rápido, controle estoque, emita NFC-e e gerencie o financeiro em um só lugar. 100% online, sem instalação.</p>
+      <div class="hero-cta">
+        <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Começar grátis por 30 dias</a>
+        <a href="#demo" class="btn btn-secondary btn-lg">Ver demonstração</a>
+      </div>
 
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Laravel News</h2>
-
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laravel News is a community driven portal and newsletter aggregating all of the latest and most important news in the Laravel ecosystem, including new package releases and tutorials.
-                                </p>
-                            </div>
-
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="self-center shrink-0 stroke-red-500 w-6 h-6 mx-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-                            </svg>
-                        </a>
-
-                        <div class="scale-100 p-6 bg-white dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex motion-safe:hover:scale-[1.01] transition-all duration-250 focus:outline focus:outline-2 focus:outline-red-500">
-                            <div>
-                                <div class="h-16 w-16 bg-red-50 dark:bg-red-800/20 flex items-center justify-center rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-7 h-7 stroke-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.115 5.19l.319 1.913A6 6 0 008.11 10.36L9.75 12l-.387.775c-.217.433-.132.956.21 1.298l1.348 1.348c.21.21.329.497.329.795v1.089c0 .426.24.815.622 1.006l.153.076c.433.217.956.132 1.298-.21l.723-.723a8.7 8.7 0 002.288-4.042 1.087 1.087 0 00-.358-1.099l-1.33-1.108c-.251-.21-.582-.299-.905-.245l-1.17.195a1.125 1.125 0 01-.98-.314l-.295-.295a1.125 1.125 0 010-1.591l.13-.132a1.125 1.125 0 011.3-.21l.603.302a.809.809 0 001.086-1.086L14.25 7.5l1.256-.837a4.5 4.5 0 001.528-1.732l.146-.292M6.115 5.19A9 9 0 1017.18 4.64M6.115 5.19A8.965 8.965 0 0112 3c1.929 0 3.716.607 5.18 1.64" />
-                                    </svg>
-                                </div>
-
-                                <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Vibrant Ecosystem</h2>
-
-                                <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
-                                    Laravel's robust library of first-party tools and libraries, such as <a href="https://forge.laravel.com" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Forge</a>, <a href="https://vapor.laravel.com" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Vapor</a>, <a href="https://nova.laravel.com" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Nova</a>, and <a href="https://envoyer.io" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Envoyer</a> help you take your projects to the next level. Pair them with powerful open source libraries like <a href="https://laravel.com/docs/billing" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Cashier</a>, <a href="https://laravel.com/docs/dusk" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Dusk</a>, <a href="https://laravel.com/docs/broadcasting" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Echo</a>, <a href="https://laravel.com/docs/horizon" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Horizon</a>, <a href="https://laravel.com/docs/sanctum" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Sanctum</a>, <a href="https://laravel.com/docs/telescope" class="underline hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Telescope</a>, and more.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-center mt-16 px-0 sm:items-center sm:justify-between">
-                    <div class="text-center text-sm text-gray-500 dark:text-gray-400 sm:text-left">
-                        <div class="flex items-center gap-4">
-                            <a href="https://github.com/sponsors/taylorotwell" class="group inline-flex items-center hover:text-gray-700 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="-mt-px mr-1 w-5 h-5 stroke-gray-400 dark:stroke-gray-600 group-hover:stroke-gray-600 dark:group-hover:stroke-gray-400">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                                </svg>
-                                Sponsor
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="ml-4 text-center text-sm text-gray-500 dark:text-gray-400 sm:text-right sm:ml-0">
-                        Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
-                    </div>
-                </div>
+      <div class="mockup-wrap" id="demo" aria-label="Prévia do PDV">
+        <div class="mockup">
+          <div class="mockup-top">
+            <div class="dots"><span></span><span></span></div>
+            <div class="mockup-title">vendafacil.app • Caixa 01</div>
+          </div>
+          <div class="mockup-body">
+            <div class="panel">
+              <div class="search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+                Buscar produto, código de barras ou SKU...
+              </div>
+              <div class="products">
+                <div class="prod"><div class="prod-img"></div><div class="prod-name">Camiseta Básica</div><div class="prod-price">R$ 39,90</div></div>
+                <div class="prod"><div class="prod-img"></div><div class="prod-name">Tênis Casual</div><div class="prod-price">R$ 199,90</div></div>
+                <div class="prod"><div class="prod-img"></div><div class="prod-name">Boné Snapback</div><div class="prod-price">R$ 59,90</div></div>
+                <div class="prod"><div class="prod-img"></div><div class="prod-name">Meia (3 pares)</div><div class="prod-price">R$ 29,90</div></div>
+                <div class="prod"><div class="prod-img"></div><div class="prod-name">Mochila</div><div class="prod-price">R$ 129,90</div></div>
+                <div class="prod"><div class="prod-img"></div><div class="prod-name">Garrafa Térmica</div><div class="prod-price">R$ 79,90</div></div>
+              </div>
             </div>
+            <div class="panel">
+              <div class="cart-head">
+                <strong style="font-size:14px">Venda #1247</strong>
+                <span class="cart-tag">Aberta</span>
+              </div>
+              <div class="items">
+                <div class="item"><span>Camiseta Básica <small>x2</small></span><strong>R$ 79,80</strong></div>
+                <div class="item"><span>Boné Snapback <small>x1</small></span><strong>R$ 59,90</strong></div>
+                <div class="item"><span>Meia (3 pares) <small>x1</small></span><strong>R$ 29,90</strong></div>
+              </div>
+              <div class="total"><span style="color:#a7f3d0;font-size:13px">Total</span><strong>R$ 169,60</strong></div>
+              <div class="pay">
+                <button class="pay-btn pix">PIX</button>
+                <button class="pay-btn">Cartão</button>
+                <button class="pay-btn">Dinheiro</button>
+                <button class="pay-btn">Crediário</button>
+              </div>
+            </div>
+          </div>
         </div>
-    </body>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="recursos">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Tudo que você precisa</div>
+        <h2 class="h2">Venda mais rápido. Controle de verdade.</h2>
+        <p class="sub">Feito para o varejo brasileiro, com NFC-e, PIX e estoque por grade.</p>
+      </div>
+
+      <div class="grid-3">
+        <article class="card">
+          <div class="icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2M4 7h16M4 7v10a2 2 0 0 0 2 2h3m7-12v0M9 15h4m-4 4h8M9 21h6"/></svg>
+          </div>
+          <h3>PDV Frente de Caixa</h3>
+          <p>Venda em segundos com busca inteligente, leitor de código de barras e atalhos. Funciona no computador, tablet ou celular.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+          </div>
+          <h3>Controle de Estoque por Grade</h3>
+          <p>Gerencie tamanho, cor e variações. Baixa automática, alerta de estoque mínimo, inventário e transferência entre lojas.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/><path d="m9 15 2 2 4-4"/></svg>
+          </div>
+          <h3>Emissão NFC-e e SAT</h3>
+          <p>Emita NFC-e direto no PDV com contingência automática. Suporte a SAT Fiscal para São Paulo. Integração com SEFAZ.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M7 16l3-3 4 4 5-7"/></svg>
+          </div>
+          <h3>Financeiro Completo</h3>
+          <p>Contas a pagar e receber, fluxo de caixa, DRE, conciliação bancária e centros de custo. Veja seu lucro real.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+          </div>
+          <h3>Multi-forma de Pagamento (PIX)</h3>
+          <p>PIX QR dinâmico, cartão, dinheiro, crediário e múltiplos pagamentos na mesma venda. Troco automático e comprovante.</p>
+        </article>
+
+        <article class="card">
+          <div class="icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20V10M18 20V4M6 20v-6"/></svg>
+          </div>
+          <h3>Dashboard em tempo real</h3>
+          <p>Acompanhe vendas, ticket médio e produtos mais vendidos ao vivo. Metas por vendedor e relatórios por período.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEGMENTS -->
+  <section class="segments" id="segmentos">
+    <div class="container" style="text-align:center">
+      <h3 class="h2" style="font-size:28px">Para todo tipo de varejo</h3>
+      <div class="pills">
+        <span class="pill">Mini Mercado</span>
+        <span class="pill">Pet Shop</span>
+        <span class="pill">Moda e Vestuário</span>
+        <span class="pill">Papelaria</span>
+        <span class="pill">Materiais de Construção</span>
+        <span class="pill">Cosméticos</span>
+        <span class="pill">Acessórios</span>
+        <span class="pill">Conveniência</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section pricing" id="planos">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Planos simples</div>
+        <h2 class="h2">Comece grátis. Evolua quando vender mais.</h2>
+        <p class="sub">Sem taxa de implantação. Cancele quando quiser. Suporte em português.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-name">Gratuito</div>
+          <div class="price-value">R$0 <small>/mês</small></div>
+          <p class="price-desc">Para testar e vender pouco.</p>
+          <ul class="features">
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Até 30 vendas/mês</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> 1 usuário</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> PDV básico</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Suporte por e-mail</li>
+          </ul>
+          <div class="price-cta"><a href="{{ route('register') }}" class="btn btn-secondary" style="width:100%">Começar grátis</a></div>
+        </div>
+
+        <div class="price-card featured">
+          <span class="price-badge">Mais popular</span>
+          <div class="price-name">Pro</div>
+          <div class="price-value">R$49 <small>/mês</small></div>
+          <p class="price-desc">Para lojas que vendem todo dia.</p>
+          <ul class="features">
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Vendas ilimitadas</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> 3 usuários</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Estoque por grade</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> NFC-e ilimitada</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Financeiro completo</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> PIX integrado</li>
+          </ul>
+          <div class="price-cta"><a href="{{ route('register') }}" class="btn btn-primary" style="width:100%">Assinar Pro</a></div>
+        </div>
+
+        <div class="price-card">
+          <div class="price-name">Enterprise</div>
+          <div class="price-value">R$99 <small>/mês</small></div>
+          <p class="price-desc">Para redes e operação avançada.</p>
+          <ul class="features">
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Tudo do Pro</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Usuários ilimitados</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Multi-loja</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> SAT Fiscal</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> API e integrações</li>
+            <li><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Suporte WhatsApp prioritário</li>
+          </ul>
+          <div class="price-cta"><a href="{{ route('register') }}" class="btn btn-secondary" style="width:100%">Falar com vendas</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <div class="final-inner container">
+      <h3>Pronto para vender mais rápido?</h3>
+      <p>Crie sua conta em 2 minutos. Sem cartão. Cancele quando quiser.</p>
+      <a href="{{ route('register') }}" class="btn btn-primary btn-lg">Criar conta grátis</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="logo">
+          <span class="logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#052e24" stroke-width="2.5" stroke-linecap="round"><path d="M3 9h18M7 3v6M17 3v6M5 21h14a2 2 0 0 0 2-2V9H3v10a2 2 0 0 0 2 2Z"/></svg></span>
+          VendaFácil
+        </div>
+        <p class="foot-desc">PDV online completo para o varejo brasileiro. Rápido, estável e com NFC-e.</p>
+      </div>
+      <div>
+        <div class="foot-title">Produto</div>
+        <div class="foot-links">
+          <a href="#recursos">Recursos</a>
+          <a href="#planos">Planos</a>
+          <a href="#demo">Demonstração</a>
+          <a href="{{ route('login') }}">Entrar</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-title">Empresa</div>
+        <div class="foot-links">
+          <a href="#">Sobre</a>
+          <a href="#">Blog</a>
+          <a href="#">Carreiras</a>
+          <a href="#">Contato</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-title">Legal</div>
+        <div class="foot-links">
+          <a href="#">Termos de Uso</a>
+          <a href="#">Privacidade</a>
+          <a href="#">LGPD</a>
+          <a href="#">Segurança</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <div>© 2025 VendaFácil PDV. Todos os direitos reservados. Feito no Brasil.</div>
+      <div class="badges">
+        <span class="badge-mini">100% Online</span>
+        <span class="badge-mini">NFC-e</span>
+        <span class="badge-mini">PIX</span>
+        <span class="badge-mini">LGPD</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile menu toggle
+  const btn = document.getElementById('menuBtn');
+  const nav = document.getElementById('mobileNav');
+  btn && btn.addEventListener('click', () => nav.classList.toggle('open'));
+
+  // Subtle card hover light effect
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('pointermove', e=>{
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--x', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--y', (e.clientY - r.top) + 'px');
+    });
+  });
+</script>
+</body>
 </html>

@@ -5,9 +5,11 @@ use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\TakePOSController;
-use App\Http\Controllers\TenantController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\TenantController as AdminTenantController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -44,16 +46,10 @@ Route::middleware('auth')->group(function () {
     // O PDV isolado e APIs já são definidas abaixo no grupo auth/tenant
 });
 
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
-    Route::resource('tenants', TenantController::class);
-});
-
-    Route::middleware(['auth', 'role:dono,superadmin'])->group(function () {
-    Route::resource('users', UserController::class);
-});
-
-    Route::middleware(['auth', 'role:funcionario,dono,superadmin'])->group(function () {
-    Route::resource('products', ProductController::class);
+Route::middleware(['auth', 'role:superadmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('tenants', AdminTenantController::class);
+    Route::resource('users', AdminUserController::class)->except(['show']);
 });
 
 // PDV ISOLADO - TELA CHEIA
@@ -80,7 +76,21 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/estoque/{produto}/editar', [EstoqueController::class, 'edit'])->name('estoque.edit');
     Route::put('/estoque/{produto}', [EstoqueController::class, 'update'])->name('estoque.update');
 
+    // Dados Cliente
+    Route::get('/planos/dados', [PlanController::class, 'dados'])->name('planos.dados');
+    Route::post('/planos/dados', [PlanController::class, 'salvarDados'])->name('planos.dados.salvar');
+
     // Planos e Financeiro
-    Route::get('/planos', [App\Http\Controllers\PlanController::class, 'index'])->name('planos.index');
- });
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/planos', [PlanController::class, 'index'])->name('planos.index');
+    Route::get('/planos/upgrade/{plan}', [PlanController::class, 'upgrade'])->name('planos.upgrade');
+    Route::get('/faturas', [PlanController::class, 'faturas'])->name('planos.faturas');
+    Route::get('/minha-assinatura', [PlanController::class, 'assinatura'])->name('planos.assinatura');
+    Route::post('/minha-assinatura/cancelar', [PlanController::class, 'cancelar'])->name('planos.cancelar');
+    });
+});
+
+    Route::post('/webhook/asaas', [WebhookController::class, 'handle']);
+    Route::view('/politica-privacidade', 'legal.privacidade')->name('privacidade');
+
 require __DIR__.'/auth.php';

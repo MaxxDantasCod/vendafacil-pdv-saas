@@ -41,7 +41,10 @@
                         <li>✓ 3 usuários {!! tip('Cadastre até 3 funcionários.') !!}</li>
                         <li>✓ Suporte WhatsApp</li>
                     </ul>
-                    <a href="#" class="mt-6 block w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold text-center">Fazer Upgrade</a>
+                    <a href="{{ route('planos.upgrade', 'pro') }}" 
+           class="block w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-xl font-semibold transition-all shadow-lg shadow-blue-900/30">
+            Fazer Upgrade
+        </a>
                 </div>
 
                 <!-- PRO -->
