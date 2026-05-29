@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ProdutoController extends Controller
 {
@@ -74,6 +75,7 @@ class ProdutoController extends Controller
             ->firstOrFail();
 
         $request->validate([
+            'ref_loja' => 'required|string|max:128',
             'stock_quantity' => 'nullable|integer|min:0',
         ]);
 
@@ -128,7 +130,7 @@ class ProdutoController extends Controller
     {
         $request->validate([
             'label' => 'required|string|max:255',
-            'ref_loja' => 'nullable|string|max:128',
+            'ref_loja' => 'required|string|max:128',
             'price' => 'required|numeric|min:0',
             'barcode' => 'nullable|string|max:255',
             'stock_quantity' => 'nullable|integer|min:0',
@@ -145,8 +147,7 @@ class ProdutoController extends Controller
                 return back()->withInput()->with('error', 'Já existe um produto com essa SKU na sua loja.');
             }
         }
-
-        $refDolibarr = $request->ref_loja ?: 'LOJA' . $tenantId . '-' . time();
+        $refDolibarr = 'VF' . $tenantId . '-' . strtoupper(Str::random(8));
 
         $response = Http::withHeaders([
             'DOLAPIKEY' => env('DOLIBARR_API_KEY')
